@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../features/auth/authSlice';
+import { login } from '../../redux/slices/authSlice';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({

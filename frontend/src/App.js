@@ -8,14 +8,12 @@ import Home from './components/Home/index';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
-import GraphView from './components/Graph/GraphView';
-import PrivateRoute from './components/Common/PrivateRoute';
 import Footer from './components/Layout/Footer';
-import { Provider } from 'react-redux';
-import { store } from './store';
 import InteractiveVisualization from './components/Documentation/InteractiveVisualization';
 import RealTimeCollaboration from './components/Documentation/RealTimeCollaboration';
 import AIAnalytics from './components/Documentation/AIAnalytics';
+import { Provider } from 'react-redux';
+import store from './redux/store';
 
 const theme = createTheme({
   palette: {
@@ -42,48 +40,33 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          minHeight: '100vh',
-          bgcolor: '#0a192f'
-        }}>
-          <Navbar />
-          <Box component="main" sx={{ 
-            flexGrow: 1,
-            marginTop: '64px',
-            display: 'flex',
-            flexDirection: 'column'
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            minHeight: '100vh',
+            bgcolor: '#0a192f'
           }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/docs/visualization" element={<InteractiveVisualization />} />
-              <Route path="/docs/collaboration" element={<RealTimeCollaboration />} />
-              <Route path="/docs/analytics" element={<AIAnalytics />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/graph/:id"
-                element={
-                  <PrivateRoute>
-                    <GraphView />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
+            <Navbar />
+            <Box component="main" sx={{ 
+              flexGrow: 1,
+              marginTop: '64px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/docs/visualization" element={<InteractiveVisualization />} />
+                <Route path="/docs/collaboration" element={<RealTimeCollaboration />} />
+                <Route path="/docs/analytics" element={<AIAnalytics />} />
+                <Route path="/dashboard" element={ <Dashboard />} />
+              </Routes>
+            </Box>
+            <Footer />
           </Box>
-          <Footer />
-        </Box>
-      </Router>
-    </ThemeProvider>
+        </Router>
+      </ThemeProvider>
     </Provider>
   );
 }

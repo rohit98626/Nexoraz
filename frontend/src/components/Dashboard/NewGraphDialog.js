@@ -5,58 +5,48 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Button,
+  Button
 } from '@mui/material';
 
 const NewGraphDialog = ({ open, onClose, onSubmit }) => {
   const [graphData, setGraphData] = useState({
     title: '',
-    description: '',
+    description: ''
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     onSubmit(graphData);
     setGraphData({ title: '', description: '' });
   };
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Create New Graph</DialogTitle>
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Graph Title"
-            fullWidth
-            value={graphData.title}
-            onChange={(e) =>
-              setGraphData({ ...graphData, title: e.target.value })
-            }
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            fullWidth
-            multiline
-            rows={3}
-            value={graphData.description}
-            onChange={(e) =>
-              setGraphData({ ...graphData, description: e.target.value })
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit" variant="contained" color="primary">
-            Create
-          </Button>
-        </DialogActions>
-      </form>
+      <DialogTitle>Create New Knowledge Graph</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Title"
+          fullWidth
+          value={graphData.title}
+          onChange={(e) => setGraphData({ ...graphData, title: e.target.value })}
+        />
+        <TextField
+          margin="dense"
+          label="Description"
+          fullWidth
+          multiline
+          rows={4}
+          value={graphData.description}
+          onChange={(e) => setGraphData({ ...graphData, description: e.target.value })}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit} variant="contained">Create</Button>
+      </DialogActions>
     </Dialog>
   );
 };
 
-export default NewGraphDialog;
+export default NewGraphDialog; 

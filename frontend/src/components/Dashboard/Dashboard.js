@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Grid,
-  Paper,
   Typography,
   Button,
   Card,
@@ -12,11 +11,13 @@ import {
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchGraphs, createGraph } from '../../features/graph/graphSlice';
+import { fetchGraphs, createGraph } from '../../redux/slices/graphSlice';
 import NewGraphDialog from './NewGraphDialog';
+import UserProfile from '../Dashboard/UserProfile';
 
 const Dashboard = () => {
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [user, setUser] = useState({name:"", email:""});
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { graphs, loading } = useSelector((state) => state.graph);
@@ -34,8 +35,21 @@ const Dashboard = () => {
     setDialogOpen(false);
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
+  const handleUserProfileUpdate = (UpdatedUser) => {
+    setUser(UpdatedUser);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
+      <UserProfile user={user} onUpdate={handleUserProfileUpdate} />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <Typography variant="h4">My Knowledge Graphs</Typography>
         <Button
