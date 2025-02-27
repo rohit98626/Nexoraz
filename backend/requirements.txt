@@ -1,4 +1,6 @@
 flask
 flask-cors
 pymongo
-python-dotenv 
+python-dotenv
+razorpay>=1.3.0
+setuptools>=65.5.1 

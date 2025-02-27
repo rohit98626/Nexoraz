@@ -1,26 +1,39 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from '../../utils/axios';
 
-// Configure axios base URL
-axios.defaults.baseURL = 'http://localhost:5000';
-
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await axios.post('/api/auth/login', credentials);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 );
 
 export const register = createAsyncThunk(
   'auth/register',
+  async (userData) => {
+    const response = await axios.post('/api/auth/register', userData);
+    localStorage.setItem('token', response.data.token);
+    return response.data;
+  }
+);
+
+export const login = createAsyncThunk(
+  'auth/login',
+  async (credentials) => {
+    const response = await axios.post('/api/auth/login', credentials);
+    const { token, user } = response.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    return response.data;
+  }
+);
+
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateProfile',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await axios.put('/api/users/profile', userData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -28,48 +41,80 @@ export const register = createAsyncThunk(
   }
 );
 
+export const fetchUserProfile = createAsyncThunk(
+  'auth/fetchProfile',
+  async () => {
+    const response = await axios.get('/api/users/profile');
+    return response.data;
+  }
+);
+
+const initialState = {
+  isAuthenticated: false,
+  user: null,
+  loading: false,
+  error: null
+};
+
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    isLoading: false,
-    error: null
-  },
+  initialState,
   reducers: {
-    logout: (state) => {
-      state.user = null;
+    clearError: (state) => {
       state.error = null;
+    },
+    updatePremiumStatus: (state, action) => {
+      if (state.user) {
+        state.user.isPremium = action.payload;
+      }
     }
   },
   extraReducers: (builder) => {
     builder
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
       .addCase(login.pending, (state) => {
-        state.isLoading = true;
+        state.loading = true;
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload;
-        state.error = null;
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(login.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload?.message || 'Login failed';
+        state.loading = false;
+        state.error = action.error.message;
+        state.isAuthenticated = false;
       })
-      .addCase(register.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
       })
-      .addCase(register.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.error = null;
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
       })
-      .addCase(register.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload?.message || 'Registration failed';
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.loading = false;
       });
   }
 });
 
-export const { logout } = authSlice.actions;
+export const { clearError, updatePremiumStatus } = authSlice.actions;
 export default authSlice.reducer; 

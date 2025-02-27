@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import styled from '@emotion/styled';
 import { FaDatabase, FaProjectDiagram, FaBrain, FaRocket, FaUsers, FaChartLine } from 'react-icons/fa';
+import HomeNavbar from '../Layout/HomeNavbar';
 
 // Styled Components
 const DarkBackground = styled(Box)`
@@ -172,232 +173,235 @@ const Home = () => {
   ];
 
   return (
-    <DarkBackground>
-      {/* Floating Particles */}
-      {[...Array(20)].map((_, i) => (
-        <FloatingParticle
-          key={i}
-          color={`hsl(${Math.random() * 360}, 50%, 50%)`}
-          initial={{ 
-            x: Math.random() * window.innerWidth, 
-            y: Math.random() * window.innerHeight 
-          }}
-          animate={{
-            y: [0, -30, 0],
-            x: [0, Math.random() * 20 - 10, 0]
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
+    <>
+      <HomeNavbar />
+      <DarkBackground>
+        {/* Floating Particles */}
+        {[...Array(20)].map((_, i) => (
+          <FloatingParticle
+            key={i}
+            color={`hsl(${Math.random() * 360}, 50%, 50%)`}
+            initial={{ 
+              x: Math.random() * window.innerWidth, 
+              y: Math.random() * window.innerHeight 
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, Math.random() * 20 - 10, 0]
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        ))}
 
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
-        <Box sx={{ py: 8 }}>
-          <GlassCard
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+          <Box sx={{ py: 8 }}>
+            <GlassCard
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <Typography 
-                variant="h1" 
-                sx={{ 
-                  color: '#64ffda',
-                  fontWeight: 800,
-                  textAlign: 'center',
-                  mb: 2,
-                  fontSize: { xs: '2.5rem', md: '4rem' },
-                  textShadow: '0 0 20px rgba(100, 255, 218, 0.3)',
-                  letterSpacing: '-1px'
-                }}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
               >
-                Knowledge Graph
-              </Typography>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  color: '#8892b0',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  mb: 6,
-                  fontSize: { xs: '1.5rem', md: '2rem' },
-                }}
-              >
-                Visualize Your Knowledge Universe
-              </Typography>
-            </motion.div>
+                <Typography 
+                  variant="h1" 
+                  sx={{ 
+                    color: '#64ffda',
+                    fontWeight: 800,
+                    textAlign: 'center',
+                    mb: 2,
+                    fontSize: { xs: '2.5rem', md: '4rem' },
+                    textShadow: '0 0 20px rgba(100, 255, 218, 0.3)',
+                    letterSpacing: '-1px'
+                  }}
+                >
+                  NEXORA
+                </Typography>
+                <Typography 
+                  variant="h2" 
+                  sx={{ 
+                    color: '#8892b0',
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    mb: 6,
+                    fontSize: { xs: '1.5rem', md: '2rem' },
+                  }}
+                >
+                  Visualize Your Knowledge Universe
+                </Typography>
+              </motion.div>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mb: 8 }}>
-              <AnimatedButton
-                variant="contained"
-                onClick={handleGetStarted}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                sx={{
-                  background: 'linear-gradient(45deg, #64ffda 10%, #00bcd4 90%)',
-                  color: '#0a192f',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 20px rgba(100, 255, 218, 0.25)',
-                }}
-              >
-                Get Started
-              </AnimatedButton>
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mb: 8 }}>
+                <AnimatedButton
+                  variant="contained"
+                  onClick={handleGetStarted}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  sx={{
+                    background: 'linear-gradient(45deg, #64ffda 10%, #00bcd4 90%)',
+                    color: '#0a192f',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 20px rgba(100, 255, 218, 0.25)',
+                  }}
+                >
+                  Get Started
+                </AnimatedButton>
 
-              <AnimatedButton
-                variant="outlined"
-                onClick={handleLearnMore}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                sx={{
-                  color: '#64ffda',
-                  borderColor: '#64ffda',
-                  '&:hover': {
+                <AnimatedButton
+                  variant="outlined"
+                  onClick={handleLearnMore}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  sx={{
+                    color: '#64ffda',
                     borderColor: '#64ffda',
-                    background: 'rgba(100, 255, 218, 0.1)',
-                  },
-                }}
-              >
-                Learn More
-              </AnimatedButton>
-            </Box>
+                    '&:hover': {
+                      borderColor: '#64ffda',
+                      background: 'rgba(100, 255, 218, 0.1)',
+                    },
+                  }}
+                >
+                  Learn More
+                </AnimatedButton>
+              </Box>
 
-            <div id="features-section">
-              <Typography 
-                variant="h3" 
-                sx={{ 
-                  color: '#ccd6f6',
-                  textAlign: 'center',
-                  mb: 6,
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  fontWeight: 600
-                }}
-              >
-                Core Features
-              </Typography>
+              <div id="features-section">
+                <Typography 
+                  variant="h3" 
+                  sx={{ 
+                    color: '#ccd6f6',
+                    textAlign: 'center',
+                    mb: 6,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  Core Features
+                </Typography>
 
-              <Grid container spacing={4} sx={{ mb: 8 }}>
-                {features.map((feature, index) => (
-                  <Grid item xs={12} md={4} key={index}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: feature.delay, duration: 0.8 }}
-                    >
-                      <FeatureCard
-                      onClick={() => navigate(feature.path)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}>
-                        <Box sx={{ color: '#64ffda', mb: 2, textAlign: 'center' }}>
-                          {feature.icon}
-                        </Box>
-                        <Typography 
-                          variant="h5" 
-                          sx={{ 
-                            color: '#ccd6f6',
-                            mb: 2,
-                            textAlign: 'center',
-                            fontWeight: 600
-                          }}
-                        >
-                          {feature.title}
-                        </Typography>
-                        <Typography 
-                          sx={{ 
-                            color: '#8892b0',
-                            textAlign: 'center',
-                            lineHeight: 1.6
-                          }}
-                        >
-                          {feature.description}
-                        </Typography>
-                      </FeatureCard>
-                    </motion.div>
-                  </Grid>
-                ))}
-              </Grid>
-
-              <Typography 
-                variant="h3" 
-                sx={{ 
-                  color: '#ccd6f6',
-                  textAlign: 'center',
-                  mb: 6,
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  fontWeight: 600
-                }}
-              >
-                Additional Features
-              </Typography>
-
-              <Grid container spacing={4}>
-                {additionalFeatures.map((feature, index) => (
-                  <Grid item xs={12} md={4} key={index}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: feature.delay, duration: 0.8 }}
-                    >
-                      <FeatureCard
-                         onClick={() => navigate(feature.path)} // Direct navigation instead of handleFeatureClick
-                         whileHover={{ scale: 1.02 }}
-                         whileTap={{ scale: 0.98 }}
+                <Grid container spacing={4} sx={{ mb: 8 }}>
+                  {features.map((feature, index) => (
+                    <Grid item xs={12} md={4} key={index}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: feature.delay, duration: 0.8 }}
                       >
-                        <Box sx={{ color: '#64ffda', mb: 2, textAlign: 'center' }}>
-                          {feature.icon}
-                        </Box>
-                        <Typography 
-                          variant="h5" 
-                          sx={{ 
-                            color: '#ccd6f6',
-                            mb: 2,
-                            textAlign: 'center',
-                            fontWeight: 600
-                          }}
-                        >
-                          {feature.title}
-                        </Typography>
-                        <Typography 
-                          sx={{ 
-                            color: '#8892b0',
-                            textAlign: 'center',
-                            lineHeight: 1.6
-                          }}
-                        >
-                          {feature.description}
-                        </Typography>
-                      </FeatureCard>
-                    </motion.div>
-                  </Grid>
-                ))}
-              </Grid>
-            </div>
-          </GlassCard>
-        </Box>
-      </Container>
+                        <FeatureCard
+                        onClick={() => navigate(feature.path)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}>
+                          <Box sx={{ color: '#64ffda', mb: 2, textAlign: 'center' }}>
+                            {feature.icon}
+                          </Box>
+                          <Typography 
+                            variant="h5" 
+                            sx={{ 
+                              color: '#ccd6f6',
+                              mb: 2,
+                              textAlign: 'center',
+                              fontWeight: 600
+                            }}
+                          >
+                            {feature.title}
+                          </Typography>
+                          <Typography 
+                            sx={{ 
+                              color: '#8892b0',
+                              textAlign: 'center',
+                              lineHeight: 1.6
+                            }}
+                          >
+                            {feature.description}
+                          </Typography>
+                        </FeatureCard>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                </Grid>
 
-      {/* Scroll to Top Button */}
-      <AnimatePresence>
-        {showScrollButton && (
-          <ScrollToTopButton
-            onClick={handleScrollToTop}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <IoIosArrowUp size={25} />
-          </ScrollToTopButton>
-        )}
-      </AnimatePresence>
-    </DarkBackground>
+                <Typography 
+                  variant="h3" 
+                  sx={{ 
+                    color: '#ccd6f6',
+                    textAlign: 'center',
+                    mb: 6,
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    fontWeight: 600
+                  }}
+                >
+                  Additional Features
+                </Typography>
+
+                <Grid container spacing={4}>
+                  {additionalFeatures.map((feature, index) => (
+                    <Grid item xs={12} md={4} key={index}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: feature.delay, duration: 0.8 }}
+                      >
+                        <FeatureCard
+                           onClick={() => navigate(feature.path)} // Direct navigation instead of handleFeatureClick
+                           whileHover={{ scale: 1.02 }}
+                           whileTap={{ scale: 0.98 }}
+                        >
+                          <Box sx={{ color: '#64ffda', mb: 2, textAlign: 'center' }}>
+                            {feature.icon}
+                          </Box>
+                          <Typography 
+                            variant="h5" 
+                            sx={{ 
+                              color: '#ccd6f6',
+                              mb: 2,
+                              textAlign: 'center',
+                              fontWeight: 600
+                            }}
+                          >
+                            {feature.title}
+                          </Typography>
+                          <Typography 
+                            sx={{ 
+                              color: '#8892b0',
+                              textAlign: 'center',
+                              lineHeight: 1.6
+                            }}
+                          >
+                            {feature.description}
+                          </Typography>
+                        </FeatureCard>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                </Grid>
+              </div>
+            </GlassCard>
+          </Box>
+        </Container>
+
+        {/* Scroll to Top Button */}
+        <AnimatePresence>
+          {showScrollButton && (
+            <ScrollToTopButton
+              onClick={handleScrollToTop}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <IoIosArrowUp size={25} />
+            </ScrollToTopButton>
+          )}
+        </AnimatePresence>
+      </DarkBackground>
+    </>
   );
 };
 

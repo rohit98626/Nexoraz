@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/slices/authSlice';
+import HomeNavbar from '../Layout/HomeNavbar';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -22,9 +23,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await dispatch(login(credentials));
-    if (!result.error) {
+    try {
+      const result = await dispatch(login(credentials)).unwrap();
+      console.log('Login response:', result);
       navigate('/dashboard');
+    } catch (err) {
+      setCredentials({ ...credentials, error: err.message || 'Login failed' });
     }
   };
 
@@ -37,6 +41,7 @@ const Login = () => {
         minHeight: 'calc(100vh - 64px)',
       }}
     >
+      <HomeNavbar />
       <Paper sx={{ p: 4, width: '100%', maxWidth: 400 }}>
         <Typography variant="h5" align="center" gutterBottom>
           Login

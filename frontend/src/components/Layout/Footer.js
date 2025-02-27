@@ -26,6 +26,29 @@ const SocialIcon = styled(IconButton)`
   }
 `;
 
+const socialLinks = [
+  { 
+    Icon: FaLinkedin, 
+    url: 'https://www.linkedin.com/in/rohit-prajapat-878bb2255',
+    label: 'LinkedIn'
+  },
+  { 
+    Icon: FaTwitter, 
+    url: 'https://x.com/nexoraz_',
+    label: 'Twitter'
+  },
+  { 
+    Icon: FaInstagram, 
+    url: 'https://www.instagram.com/nexoraz_',
+    label: 'Instagram'
+  },
+  { 
+    Icon: FaEnvelope, 
+    url: 'mailto:contactnexoraz@gmail.com',
+    label: 'Email'
+  }
+];
+
 const Footer = () => {
   return (
     <FooterContainer>
@@ -50,7 +73,7 @@ const Footer = () => {
                 Contact Us
               </Typography>
               <Typography sx={{ color: '#8892b0' }}>
-                Email: contact@knowledgegraph.com<br />
+                Email: contactnexoraz@gmail.com<br />
                 Phone: +91 7357707100<br />
                 Address: Parul University, Vadodara
               </Typography>
@@ -63,14 +86,20 @@ const Footer = () => {
                 Connect With Us
               </Typography>
               <Box>
-                {[FaLinkedin, FaTwitter, FaInstagram, FaEnvelope].map((Icon, index) => (
+                {socialLinks.map((social, index) => (
                   <motion.div
                     key={index}
                     style={{ display: 'inline-block' }}
                     whileHover={{ y: -5 }}
                   >
-                    <SocialIcon>
-                      <Icon size={24} />
+                    <SocialIcon 
+                      component="a"
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
+                    >
+                      <social.Icon size={24} />
                     </SocialIcon>
                   </motion.div>
                 ))}
@@ -81,7 +110,7 @@ const Footer = () => {
         
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography sx={{ color: '#8892b0' }}>
-            © 2025 Knowledge Graph. All rights reserved.
+            © 2025 NEXORAZ. All rights reserved.
           </Typography>
         </Box>
       </Container>
