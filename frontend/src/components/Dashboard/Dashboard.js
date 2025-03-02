@@ -37,6 +37,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchGraphs, createGraph, deleteGraph } from '../../redux/slices/graphSlice';
 import NewGraphDialog from './NewGraphDialog';
 import { useAuth } from '../../contexts/AuthContext';
+import { loadScript } from '../../utils/loadScript';
 
 const Dashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -54,10 +55,18 @@ const Dashboard = () => {
   const [favorites, setFavorites] = useState(new Set());
   const { user } = useAuth();
   const [graphUsage, setGraphUsage] = useState(null);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
   useEffect(() => {
     dispatch(fetchGraphs());
     fetchGraphUsage();
+
+    // Set up periodic refresh of graph usage
+    const refreshInterval = setInterval(fetchGraphUsage, 30000); // Refresh every 30 seconds
+
+    return () => {
+      clearInterval(refreshInterval); // Cleanup on unmount
+    };
   }, [dispatch]);
 
   const filteredAndSortedGraphs = React.useMemo(() => {
@@ -100,6 +109,7 @@ const Dashboard = () => {
     dispatch(createGraph(graphData)).then((action) => {
       if (action.payload && !action.error) {
         const graphId = action.payload._id;
+        fetchGraphUsage();
         navigate(`/graph/${graphId}`);
       }
     });
@@ -159,15 +169,106 @@ const Dashboard = () => {
 
   const fetchGraphUsage = async () => {
     try {
+      setIsLoadingUsage(true);
       const response = await fetch('http://localhost:5000/api/user/graph-usage', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       const data = await response.json();
-      setGraphUsage(data);
+      if (data.error) {
+        console.error('Error fetching graph usage:', data.error);
+        setGraphUsage({ graphs_created_today: 0, is_premium: false });
+      } else {
+        setGraphUsage(data);
+      }
     } catch (error) {
       console.error('Error fetching graph usage:', error);
+      setGraphUsage({ graphs_created_today: 0, is_premium: false });
+    } finally {
+      setIsLoadingUsage(false);
+    }
+  };
+
+  const handlePremiumUpgrade = async () => {
+    // Load Razorpay script
+    const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+    
+    if (!res) {
+      alert('Razorpay SDK failed to load. Please check your connection.');
+      return;
+    }
+
+    try {
+      // Create order on backend
+      const response = await fetch('http://localhost:5000/api/payment/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          amount: 999, // Amount in paise (e.g., ₹999 = 99900 paise)
+          currency: 'INR'
+        })
+      });
+
+      const orderData = await response.json();
+      
+      if (orderData.error) {
+        throw new Error(orderData.error);
+      }
+
+      // Initialize Razorpay options
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Knowledge Graph Premium',
+        description: 'Upgrade to Premium Plan',
+        order_id: orderData.id,
+        handler: async function (response) {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch('http://localhost:5000/api/payment/verify', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            const data = await verifyResponse.json();
+            
+            if (data.success) {
+              // Update local user state to reflect premium status
+              fetchGraphUsage();
+              alert('Successfully upgraded to premium!');
+            }
+          } catch (err) {
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: user?.name || '',
+          email: user?.email || ''
+        },
+        theme: {
+          color: '#64ffda'
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+      
+    } catch (error) {
+      console.error('Payment initiation failed:', error);
+      alert('Unable to initiate payment. Please try again later.');
     }
   };
 
@@ -185,6 +286,47 @@ const Dashboard = () => {
         <Typography variant="h4" color="#64ffda">
           My Knowledge Graphs
         </Typography>
+
+        {/* Graph Usage Indicator */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2,
+          bgcolor: 'rgba(17, 34, 64, 0.8)',
+          p: 2,
+          borderRadius: 1,
+          border: '1px solid rgba(100, 255, 218, 0.1)'
+        }}>
+          {isLoadingUsage ? (
+            <CircularProgress size={20} sx={{ color: '#64ffda' }} />
+          ) : (
+            <Typography variant="body2" sx={{ color: '#8892b0' }}>
+              {graphUsage?.is_premium ? (
+                'Premium User (Unlimited Graphs)'
+              ) : (
+                `Daily Graphs: ${graphUsage?.graphs_created_today || 0} / 10`
+              )}
+            </Typography>
+          )}
+          {!graphUsage?.is_premium && !isLoadingUsage && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handlePremiumUpgrade}
+              sx={{ 
+                color: '#64ffda',
+                borderColor: '#64ffda',
+                '&:hover': {
+                  borderColor: '#4caf50',
+                  bgcolor: 'rgba(100, 255, 218, 0.1)'
+                }
+              }}
+            >
+              Upgrade to Premium
+            </Button>
+          )}
+        </Box>
+        
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -192,7 +334,9 @@ const Dashboard = () => {
           sx={{
             bgcolor: '#64ffda',
             color: '#0a192f',
-            '&:hover': { bgcolor: '#4caf50' }
+            '&:hover': {
+              bgcolor: '#4caf50'
+            }
           }}
         >
           Create New Graph
@@ -349,22 +493,6 @@ const Dashboard = () => {
         onClose={() => setDialogOpen(false)}
         onSubmit={handleCreateGraph}
       />
-
-      {/* Graph Usage Info */}
-      {graphUsage && !user?.isPremium && (
-        <div className="graph-usage-info">
-          <h3>Graph Usage</h3>
-          <p>Graphs Created Today: {graphUsage.graphs_created_today} / {graphUsage.daily_limit}</p>
-          {graphUsage.graphs_created_today >= graphUsage.daily_limit && (
-            <div className="limit-warning">
-              <p>You've reached your daily limit. Upgrade to Premium for unlimited graphs!</p>
-              <button onClick={() => navigate('/pricing')} className="upgrade-button">
-                Upgrade Now
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </Box>
   );
 };

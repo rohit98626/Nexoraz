@@ -520,7 +520,6 @@ def generate_graph_data():
         data = request.json
         title = data.get('title')
         description = data.get('description')
-<<<<<<< HEAD
 
         # More structured and cleaner prompt
         prompt = f"""
@@ -540,78 +539,22 @@ def generate_graph_data():
         - "main" for central concept
         - "concept" for primary nodes
         - "feature" for secondary nodes
-=======
-        graph_type = data.get('type', 'concept')
-        settings = data.get('settings', {})
-
-        # Enhanced prompt that uses both title and description
-        prompt = f"""
-        Create a comprehensive knowledge graph based on:
-        Title: {title}
-        Description: {description}
-        Graph Type: {graph_type}
-
-        Analysis Instructions:
-        1. First, analyze the title to identify the main concept
-        2. Extract key themes from the description
-        3. Identify relationships between concepts
-        4. Create a balanced, hierarchical structure
-
-        Rules for graph structure:
-        1. Create main node using the title: "{title}"
-        2. Extract 3-4 primary concepts from the description
-        3. For each primary concept, identify 1-2 related concepts from the description
-        4. Ensure all relationships are meaningful and derived from the description
-        5. Use clear, concise labels (max 2 words)
-        6. Create a balanced, visually appealing layout
-
-        Node Types and Guidelines:
-        - Main Node (title concept):
-          * Shape: star
-          * Label: "{title}"
-          * Type: "main"
-          
-        - Primary Nodes (key concepts):
-          * Shape: hexagon
-          * Type: "concept"
-          * Extract from description
-          
-        - Secondary Nodes (supporting details):
-          * Shape: diamond
-          * Type: "feature"
-          * Must relate to primary nodes
-
-        Relationship Guidelines:
-        1. Use active verbs for relationships
-        2. Keep labels concise and clear
-        3. Ensure logical flow
-        4. Base all connections on the provided description
->>>>>>> 17e6718 (initial commit)
 
         Return a JSON with this exact structure:
         {{
             "nodes": [
                 {{
                     "id": "n0",
-<<<<<<< HEAD
                     "label": "Main Concept",
                     "type": "main",
                     "description": "Clear description"
                 }},
                 // More nodes...
-=======
-                    "label": "{title}",
-                    "type": "main",
-                    "description": "Main concept from title"
-                }},
-                // Additional nodes based on description
->>>>>>> 17e6718 (initial commit)
             ],
             "edges": [
                 {{
                     "source": "n0",
                     "target": "n1",
-<<<<<<< HEAD
                     "label": "simple relationship"
                 }},
                 // More edges...
@@ -626,23 +569,6 @@ def generate_graph_data():
         """
 
         # Get AI response
-=======
-                    "label": "relates to"
-                }},
-                // Additional relationships
-            ]
-        }}
-
-        Limits and Balance:
-        - Total nodes: 8-12
-        - Total edges: 10-15
-        - Ensure balanced distribution
-        - Maintain clear hierarchy
-        - Avoid crossing relationships
-        """
-
-        # Generate graph data
->>>>>>> 17e6718 (initial commit)
         response = model.generate_content(prompt)
         graph_data = json.loads(response.text)
 
@@ -650,10 +576,6 @@ def generate_graph_data():
         processed_data = process_graph_data(graph_data)
         
         return jsonify(processed_data)
-<<<<<<< HEAD
-=======
-
->>>>>>> 17e6718 (initial commit)
     except Exception as e:
         logger.error(f"Error generating graph data: {e}")
         return jsonify({'error': str(e)}), 500
@@ -669,7 +591,6 @@ def process_graph_data(data):
         nodes = data['nodes'][:12]  # Maximum 12 nodes
         edges = data['edges'][:15]  # Maximum 15 edges
 
-<<<<<<< HEAD
         # Process nodes
         processed_nodes = []
         node_ids = set()
@@ -683,30 +604,6 @@ def process_graph_data(data):
             }
             processed_nodes.append(new_node)
             node_ids.add(new_node['id'])
-=======
-        # Ensure balanced primary nodes (direct connections to main)
-        main_node = next((n for n in nodes if n['type'] == 'main'), None)
-        if main_node:
-            direct_connections = [
-                e for e in edges 
-                if e['source'] == main_node['id'] or e['target'] == main_node['id']
-            ]
-            
-            # Limit direct connections to 3-4 for better visualization
-            if len(direct_connections) > 4:
-                edges = [e for e in edges if e not in direct_connections[4:]]
-
-        # Process nodes with better spacing
-        processed_nodes = []
-        for i, node in enumerate(nodes):
-            new_node = {
-                'id': f'n{i}',
-                'label': node['label'][:20],  # Shorter labels for better display
-                'type': node['type'],
-                'description': node['description'][:150]  # Shorter descriptions
-            }
-            processed_nodes.append(new_node)
->>>>>>> 17e6718 (initial commit)
 
         # Process edges
         processed_edges = []
@@ -730,128 +627,4 @@ def process_graph_data(data):
         }
     except Exception as e:
         logger.error(f"Error processing graph data: {e}")
-<<<<<<< HEAD
         raise 
-=======
-        raise
-
-@chat_bp.route('/api/generate-subgraph', methods=['POST'])
-@jwt_required()
-def generate_subgraph():
-    try:
-        data = request.json
-        topic = data.get('topic')
-        description = data.get('description')
-
-        # Add default values in case of failure
-        default_response = {
-            "nodes": [],
-            "edges": [],
-            "summary": f"Detailed information about {topic}",
-            "keyPoints": [f"Loading information about {topic}..."],
-            "referralLink": "#"
-        }
-
-        try:
-            response = model.generate_content(prompt)
-            data = json.loads(response.text)
-            # Ensure all required fields exist
-            data.setdefault('summary', default_response['summary'])
-            data.setdefault('keyPoints', default_response['keyPoints'])
-            data.setdefault('referralLink', default_response['referralLink'])
-            return jsonify(data)
-        except Exception as e:
-            logger.error(f"Error in AI response: {e}")
-            return jsonify(default_response)
-
-    except Exception as e:
-        logger.error(f"Error generating subgraph: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@chat_bp.route('/api/node-details', methods=['POST'])
-@jwt_required()
-def get_node_details():
-    try:
-        data = request.json
-        topic = data.get('topic')
-        node_type = data.get('type')
-
-        prompt = f"""
-        Generate comprehensive information about: {topic}
-        Type: {node_type}
-
-        Provide detailed information in this exact structure:
-        {{
-            "overview": "Detailed explanation of the topic (2-3 paragraphs)",
-            "definition": "Clear and concise definition",
-            "keyFeatures": [
-                {{
-                    "title": "Feature name",
-                    "description": "Detailed explanation",
-                    "importance": "Why this feature matters"
-                }}
-            ],
-            "history": {{
-                "origin": "Origin of the concept/topic",
-                "evolution": "How it evolved over time",
-                "milestones": ["Key milestone 1", "Key milestone 2"]
-            }},
-            "applications": [
-                {{
-                    "field": "Application area",
-                    "description": "How it's used",
-                    "examples": ["Example 1", "Example 2"],
-                    "impact": "Impact in this field"
-                }}
-            ],
-            "advantages": ["Advantage 1", "Advantage 2"],
-            "limitations": ["Limitation 1", "Limitation 2"],
-            "bestPractices": ["Practice 1", "Practice 2"],
-            "relatedTopics": [
-                {{
-                    "name": "Related Topic",
-                    "relationship": "How it relates to main topic"
-                }}
-            ],
-            "resources": [
-                {{
-                    "title": "Resource name",
-                    "type": "article/video/book/tutorial",
-                    "url": "URL to resource",
-                    "description": "Brief description"
-                }}
-            ],
-            "experts": [
-                {{
-                    "name": "Expert name",
-                    "contribution": "Their contribution to the field"
-                }}
-            ],
-            "statistics": {{
-                "usage": "Usage statistics",
-                "trends": "Current trends",
-                "futureProjections": "Future outlook"
-            }},
-            "learnMoreUrl": "Primary URL for detailed information"
-        }}
-
-        Make the information detailed, accurate, and educational.
-        Include real-world examples and current information.
-        """
-
-        response = model.generate_content(prompt)
-        data = json.loads(response.text)
-        
-        return jsonify(data)
-
-    except Exception as e:
-        logger.error(f"Error generating node details: {e}")
-        return jsonify({
-            'overview': f"Information about {topic}",
-            'definition': "Loading...",
-            'keyFeatures': [{'title': 'Loading...', 'description': 'Please wait...'}],
-            'applications': [{'field': 'Loading...', 'description': 'Please wait...'}],
-            'relatedTopics': [{'name': 'Loading...', 'relationship': '...'}],
-            'learnMoreUrl': '#'
-        }) 
->>>>>>> 17e6718 (initial commit)

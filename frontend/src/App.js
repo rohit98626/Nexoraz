@@ -43,6 +43,29 @@ const theme = createTheme({
   typography: {
     fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
   },
+  components: {
+    MuiModal: {
+      defaultProps: {
+        container: document.body,
+        disablePortal: false,
+        keepMounted: true
+      },
+      styleOverrides: {
+        root: {
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(10, 25, 47, 0.8)',
+          }
+        }
+      }
+    },
+    MuiDialog: {
+      defaultProps: {
+        scroll: 'paper',
+        maxWidth: 'sm',
+        fullWidth: true
+      }
+    }
+  },
 });
 
 // Protected Route component
@@ -65,16 +88,19 @@ const AppContent = () => {
   const isRegisterPage = location.pathname === "/register";
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column',
-      minHeight: '100vh',
-      bgcolor: '#0a192f'
-    }}>
+    <Box 
+      component="main"
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        minHeight: '100vh',
+        bgcolor: '#0a192f'
+      }}
+    >
       {showHomeNavbar ? <HomeNavbar /> : <Navbar />}
-      <Box component="main" sx={{ 
+      <Box sx={{ 
         flexGrow: 1,
-        marginTop:'64px',
+        marginTop: '64px',
         display: 'flex',
         flexDirection: 'column'
       }}>

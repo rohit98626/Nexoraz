@@ -1,6 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Paper, TextField, IconButton, Tooltip, Divider } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  CircularProgress, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  Paper, 
+  TextField, 
+  IconButton, 
+  Tooltip, 
+  Divider,
+  useTheme,
+  useMediaQuery,
+  Drawer,
+  Fab,
+  Zoom,
+  Link
+} from '@mui/material';
 import axios from '../../utils/axios';
 import { Network } from 'vis-network/standalone';
 import 'vis-network/styles/vis-network.css';
@@ -8,16 +28,22 @@ import SearchIcon from '@mui/icons-material/Search';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
+import MenuIcon from '@mui/icons-material/Menu';
 import { 
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
   Refresh as RefreshIcon,
-  ViewModule as ViewModuleIcon
+  ViewModule as ViewModuleIcon,
+  Close as CloseIcon,
+  Launch as LaunchIcon
 } from '@mui/icons-material';
 
 const Graph = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [graph, setGraph] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,6 +53,13 @@ const Graph = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isPhysicsEnabled, setIsPhysicsEnabled] = useState(true);
   const [layout, setLayout] = useState('force'); // 'force' or 'hierarchical'
+  const [controlsOpen, setControlsOpen] = useState(!isMobile);
+  const [wikiInfo, setWikiInfo] = useState(null);
+  const [loadingWiki, setLoadingWiki] = useState(false);
+
+  useEffect(() => {
+    setControlsOpen(!isMobile);
+  }, [isMobile]);
 
   useEffect(() => {
     const fetchGraph = async () => {
@@ -55,107 +88,195 @@ const Graph = () => {
     const nodes = graph.nodes.map(node => ({
       id: node.id,
       label: node.label,
-      title: node.description,
+      title: `Node ${node.id}`,
       color: {
         background: getNodeColor(node.type),
-        border: '#ffffff',
+        border: 'rgba(255, 255, 255, 0.3)',
         highlight: {
-          background: '#ffffff',
+          background: 'rgba(255, 255, 255, 0.15)',
+          border: getNodeColor(node.type)
+        },
+        hover: {
+          background: 'rgba(255, 255, 255, 0.1)',
           border: getNodeColor(node.type)
         }
       },
       font: {
-        size: node.type === 'main' ? 20 : 16,
-        color: '#ffffff',
-        background: 'rgba(10, 25, 47, 0.95)'
+        size: node.type === 'main' ? 18 : 14,
+        color: 'rgba(255, 255, 255, 0.8)',
+        face: 'Arial',
+        background: 'rgba(10, 25, 47, 0.7)',
+        strokeWidth: 0,
+        strokeColor: 'rgba(10, 25, 47, 0.7)'
       },
-      size: node.type === 'main' ? 40 : 30
+      size: node.type === 'main' ? 35 : 25,
+      margin: 12,
+      widthConstraint: {
+        minimum: 50,
+        maximum: 150
+      }
     }));
 
     const edges = graph.edges.map(edge => ({
       from: edge.source,
       to: edge.target,
       label: edge.label,
-      color: { color: '#64ffda', opacity: 0.6 },
-      font: {
-        size: 16,
-        color: '#ffffff',
-        background: 'rgba(10, 25, 47, 0.95)',
-        strokeWidth: 0,
-        align: 'horizontal'
+      color: { 
+        color: 'rgba(100, 255, 218, 0.3)',
+        highlight: 'rgba(100, 255, 218, 0.5)',
+        hover: 'rgba(100, 255, 218, 0.5)',
+        opacity: 0.6 
       },
-      arrows: { to: { enabled: true, scaleFactor: 0.7 } },
-      smooth: { type: 'straightCross', roundness: 0.2 }
+      font: {
+        size: 12,
+        color: 'rgba(255, 255, 255, 0.6)',
+        face: 'Arial',
+        background: 'rgba(10, 25, 47, 0.7)',
+        strokeWidth: 0,
+        strokeColor: 'rgba(10, 25, 47, 0.7)',
+        align: 'middle',
+        multi: false,
+        vadjust: -20
+      },
+      arrows: { 
+        to: { 
+          enabled: true, 
+          scaleFactor: 0.3,
+          type: 'arrow'
+        } 
+      },
+      smooth: { 
+        enabled: true,
+        type: 'continuous',
+        roundness: 0.3,
+        forceDirection: 'none'
+      },
+      width: 1,
+      length: 250,
+      labelHighlightBold: false,
+      physics: true,
+      chosen: {
+        edge: (values, id, selected, hovering) => {
+          values.color = hovering ? 'rgba(255, 255, 255, 0.4)' : 'rgba(100, 255, 218, 0.3)';
+          values.width = hovering ? 2 : 1;
+        },
+        label: (values, id, selected, hovering) => {
+          values.color = hovering ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.6)';
+          values.strokeColor = hovering ? 'rgba(10, 25, 47, 0.8)' : 'rgba(10, 25, 47, 0.7)';
+        }
+      }
     }));
 
     const options = {
       nodes: {
         shape: 'dot',
-        size: 30,
+        size: 25,
         font: {
-          size: 16,
-          color: '#ffffff',
-          face: 'Poppins',
-          background: 'rgba(10, 25, 47, 0.95)',
+          size: 14,
+          color: 'rgba(255, 255, 255, 0.8)',
+          face: 'Arial',
+          background: 'rgba(10, 25, 47, 0.7)',
           strokeWidth: 0,
+          strokeColor: 'rgba(10, 25, 47, 0.7)',
           multi: false,
-          vadjust: -30
+          vadjust: -25
         },
-        borderWidth: 2,
+        borderWidth: 1,
+        margin: 12,
         shadow: {
           enabled: true,
-          color: 'rgba(0,0,0,0.2)',
-          size: 5
+          color: 'rgba(0,0,0,0.1)',
+          size: 3,
+          x: 0,
+          y: 2
+        },
+        chosen: {
+          node: (values, id, selected, hovering) => {
+            if (hovering) {
+              values.shadow = true;
+              values.shadowColor = 'rgba(100, 255, 218, 0.5)';
+              values.shadowSize = 10;
+            }
+          }
         }
       },
       edges: {
-        width: 2,
+        width: 1,
         color: {
-          color: '#64ffda',
-          opacity: 0.6,
-          highlight: '#ffffff'
+          color: 'rgba(100, 255, 218, 0.3)',
+          highlight: 'rgba(100, 255, 218, 0.5)',
+          hover: 'rgba(100, 255, 218, 0.5)',
+          opacity: 0.6
         },
         font: {
-          size: 14,
-          color: '#ffffff',
-          face: 'Poppins',
-          background: 'rgba(10, 25, 47, 0.95)',
+          size: 12,
+          color: 'rgba(255, 255, 255, 0.6)',
+          face: 'Arial',
+          background: 'rgba(10, 25, 47, 0.7)',
           strokeWidth: 0,
-          align: 'horizontal',
-          vadjust: -10
+          strokeColor: 'rgba(10, 25, 47, 0.7)',
+          align: 'middle',
+          multi: false,
+          vadjust: -20
         },
         arrows: {
           to: {
             enabled: true,
-            scaleFactor: 0.5
+            scaleFactor: 0.3,
+            type: 'arrow'
           }
         },
         smooth: {
           enabled: true,
-          type: 'cubicBezier',
-          roundness: 0.5
+          type: 'continuous',
+          roundness: 0.3,
+          forceDirection: 'none'
         },
-        length: 200
+        selectionWidth: 2,
+        labelHighlightBold: false,
+        chosen: true
       },
       layout: {
+        improvedLayout: true,
         hierarchical: {
-          enabled: true,
+          enabled: layout === 'hierarchical',
           direction: 'UD',
           sortMethod: 'directed',
-          nodeSpacing: 150,
-          levelSeparation: 150
+          nodeSpacing: 200,
+          levelSeparation: 250,
+          treeSpacing: 250,
+          blockShifting: true,
+          edgeMinimization: true,
+          parentCentralization: true
         }
       },
       physics: {
-        enabled: false,
+        enabled: isPhysicsEnabled,
+        solver: layout === 'hierarchical' ? 'hierarchicalRepulsion' : 'forceAtlas2Based',
+        forceAtlas2Based: {
+          gravitationalConstant: -1000,
+          centralGravity: 0.005,
+          springLength: 300,
+          springConstant: 0.05,
+          damping: 0.4,
+          avoidOverlap: 1
+        },
         hierarchicalRepulsion: {
           centralGravity: 0.0,
-          springLength: 200,
+          springLength: 300,
           springConstant: 0.01,
-          nodeDistance: 150,
+          nodeDistance: 250,
           damping: 0.09
         },
-        solver: 'hierarchicalRepulsion'
+        stabilization: {
+          enabled: true,
+          iterations: 1000,
+          updateInterval: 100,
+          fit: true
+        },
+        timestep: 0.5,
+        adaptiveTimestep: true,
+        minVelocity: 0.75
       },
       interaction: {
         hover: true,
@@ -163,7 +284,10 @@ const Graph = () => {
         dragView: true,
         dragNodes: true,
         navigationButtons: true,
-        keyboard: true
+        keyboard: true,
+        tooltipDelay: 200,
+        hideEdgesOnDrag: true,
+        hideEdgesOnZoom: true
       }
     };
 
@@ -175,22 +299,43 @@ const Graph = () => {
       // Initial positioning
       const mainNode = graph.nodes.find(n => n.type === 'main');
       if (mainNode) {
-        networkInstance.once('stabilized', () => {
-          positionNodesRadially(networkInstance, graph.nodes, mainNode.id);
-          networkInstance.setOptions({ 
-            physics: { enabled: false },
-            interaction: {
-              zoomView: true,
-              dragView: true,
-              dragNodes: true,
-              initialZoom: 1  // Set initial zoom level
+        networkInstance.once('stabilizationIterationsDone', () => {
+          const positions = networkInstance.getPositions();
+          const nodeIds = Object.keys(positions);
+          
+          // Calculate the center of mass
+          let centerX = 0, centerY = 0;
+          nodeIds.forEach(id => {
+            centerX += positions[id].x;
+            centerY += positions[id].y;
+          });
+          centerX /= nodeIds.length;
+          centerY /= nodeIds.length;
+          
+          // Move main node to center and others radially
+          networkInstance.moveNode(mainNode.id, centerX, centerY);
+          const otherNodes = nodeIds.filter(id => id !== mainNode.id);
+          const radius = 400;
+          const angleStep = (2 * Math.PI) / otherNodes.length;
+          
+          otherNodes.forEach((id, index) => {
+            const angle = angleStep * index;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            networkInstance.moveNode(id, x, y);
+          });
+          
+          networkInstance.fit({
+            animation: {
+              duration: 1000,
+              easingFunction: 'easeOutQuad'
             }
           });
         });
       }
 
-      // Add click handler
-      networkInstance.on('click', function(params) {
+      // Add click handler for node selection
+      networkInstance.on('click', (params) => {
         if (params.nodes.length > 0) {
           const nodeId = params.nodes[0];
           const node = graph.nodes.find(n => n.id === nodeId);
@@ -198,31 +343,22 @@ const Graph = () => {
           setDialogOpen(true);
         }
       });
-
-      // Add double-click handler
-      networkInstance.on('doubleClick', function(params) {
-        if (params.nodes.length > 0) {
-          const nodeId = params.nodes[0];
-          const connectedEdges = networkInstance.getConnectedEdges(nodeId);
-          const currentVisibility = networkInstance.getEdgesById(connectedEdges[0]).hidden || false;
-          
-          connectedEdges.forEach(edgeId => {
-            networkInstance.updateEdge(edgeId, { hidden: !currentVisibility });
-          });
-          
-          // Get connected nodes
-          const connectedNodes = connectedEdges.reduce((nodes, edgeId) => {
-            const edge = networkInstance.getEdgesById(edgeId);
-            return [...nodes, edge.from, edge.to];
-          }, []);
-          
-          // Hide/show connected nodes
-          connectedNodes.forEach(nodeId => {
-            if (nodeId !== params.nodes[0]) {  // Don't hide the clicked node
-              networkInstance.updateNode(nodeId, { hidden: !currentVisibility });
-            }
-          });
-        }
+      
+      // Add hover event handler for tooltips
+      networkInstance.on('hoverNode', (params) => {
+        container.style.cursor = 'pointer';
+      });
+      
+      networkInstance.on('blurNode', () => {
+        container.style.cursor = 'default';
+      });
+      
+      networkInstance.on('hoverEdge', () => {
+        container.style.cursor = 'pointer';
+      });
+      
+      networkInstance.on('blurEdge', () => {
+        container.style.cursor = 'default';
       });
 
       setNetwork(networkInstance);
@@ -238,10 +374,12 @@ const Graph = () => {
   // Helper functions for node styling
   function getNodeColor(type) {
     switch (type) {
-      case 'main': return '#64ffda';
-      case 'concept': return '#00bcd4';
-      case 'feature': return '#7c3aed';
-      default: return '#64ffda';
+      case 'main': return 'rgba(100, 255, 218, 0.7)';
+      case 'concept': return 'rgba(0, 188, 212, 0.7)';
+      case 'feature': return 'rgba(124, 58, 237, 0.7)';
+      case 'location': return 'rgba(76, 175, 80, 0.7)';
+      case 'organization': return 'rgba(255, 152, 0, 0.7)';
+      default: return 'rgba(100, 255, 218, 0.7)';
     }
   }
 
@@ -306,20 +444,92 @@ const Graph = () => {
   const handleSearch = () => {
     if (!network || !searchTerm) return;
     
+    const searchTermLower = searchTerm.toLowerCase().trim();
+    
+    // Find matching nodes
     const matchingNodes = graph.nodes.filter(node => 
-      node.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      node.description.toLowerCase().includes(searchTerm.toLowerCase())
+      node.label.toLowerCase().includes(searchTermLower) ||
+      node.description.toLowerCase().includes(searchTermLower) ||
+      node.type.toLowerCase().includes(searchTermLower)
     );
 
     if (matchingNodes.length > 0) {
-      const nodeIds = matchingNodes.map(node => node.id);
-      network.selectNodes(nodeIds);
+      // Highlight matching nodes
+      network.selectNodes(matchingNodes.map(node => node.id));
+      
+      // Focus the network on the matching nodes
       network.fit({
-        nodes: nodeIds,
-        animation: true
+        nodes: matchingNodes.map(node => node.id),
+        animation: {
+          duration: 1000,
+          easingFunction: 'easeInOutQuad'
+        }
       });
+
+      // Highlight the nodes with a different color
+      const updatedNodes = graph.nodes.map(node => ({
+        ...node,
+        color: matchingNodes.some(n => n.id === node.id) 
+          ? { 
+              background: '#ffffff',
+              border: getNodeColor(node.type),
+              highlight: {
+                background: '#ffffff',
+                border: getNodeColor(node.type)
+              }
+            }
+          : {
+              background: getNodeColor(node.type),
+              border: '#ffffff',
+              highlight: {
+                background: '#ffffff',
+                border: getNodeColor(node.type)
+              }
+            }
+      }));
+
+      network.setData({ 
+        nodes: updatedNodes, 
+        edges: graph.edges 
+      });
+
+      // Reset node colors after 2 seconds
+      setTimeout(() => {
+        const originalNodes = graph.nodes.map(node => ({
+          ...node,
+          color: {
+            background: getNodeColor(node.type),
+            border: '#ffffff',
+            highlight: {
+              background: '#ffffff',
+              border: getNodeColor(node.type)
+            }
+          }
+        }));
+        network.setData({ nodes: originalNodes, edges: graph.edges });
+      }, 2000);
+    } else {
+      // Show "no results" message using the network's manipulation system
+      network.setData({ nodes: graph.nodes, edges: graph.edges });
+      alert('No matching nodes found');
     }
   };
+
+  // Add keydown event handler for search
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey && event.key === 'f') {
+        event.preventDefault();
+        const searchInput = document.querySelector('input[placeholder="Search nodes..."]');
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleZoomIn = () => {
     if (!network) return;
@@ -382,46 +592,76 @@ const Graph = () => {
 
   const Legend = () => {
     const categories = [
-      { type: 'main', label: 'Main Topic', color: '#64ffda', shape: 'star' },
-      { type: 'concept', label: 'Concept', color: '#00bcd4', shape: 'hexagon' },
-      { type: 'feature', label: 'Feature', color: '#7c3aed', shape: 'diamond' },
-      { type: 'location', label: 'Location', color: '#4caf50', shape: 'square' },
-      { type: 'organization', label: 'Organization', color: '#ff9800', shape: 'database' }
+      { type: 'main', label: 'Main Topic', color: '#64ffda' },
+      { type: 'concept', label: 'Concept', color: '#00bcd4' },
+      { type: 'feature', label: 'Feature', color: '#7c3aed' },
+      { type: 'location', label: 'Location', color: '#4caf50' },
+      { type: 'organization', label: 'Organization', color: '#ff9800' }
     ];
 
     return (
-      <Box
+      <Paper
+        elevation={3}
         sx={{
           position: 'absolute',
-          bottom: 20,
-          right: 20,
+          bottom: 16,
+          right: 16,
           zIndex: 1,
-          bgcolor: 'rgba(17, 34, 64, 0.9)',
-          p: 2,
-          borderRadius: 2,
-          boxShadow: 3
+          bgcolor: 'rgba(17, 34, 64, 0.95)',
+          borderRadius: 1,
+          border: '1px solid rgba(100, 255, 218, 0.1)',
+          overflow: 'hidden',
+          maxWidth: 200,
+          backdropFilter: 'blur(10px)'
         }}
       >
-        <Typography variant="subtitle2" color="#64ffda" gutterBottom>
-          Node Types
-        </Typography>
-        {categories.map((cat) => (
-          <Box key={cat.type} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Box sx={{ 
+          px: 1.5, 
+          py: 1,
+          borderBottom: '1px solid rgba(100, 255, 218, 0.1)',
+          bgcolor: 'rgba(10, 25, 47, 0.5)'
+        }}>
+          <Typography variant="caption" color="#64ffda" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Node Types
+          </Typography>
+        </Box>
+        
+        <Box sx={{ p: 1.5 }}>
+          {categories.map((cat) => (
             <Box
+              key={cat.type}
               sx={{
-                width: 16,
-                height: 16,
-                bgcolor: cat.color,
-                borderRadius: cat.shape === 'star' ? '50%' : 1,
-                mr: 1
+                display: 'flex',
+                alignItems: 'center',
+                mb: 0.75,
+                '&:last-child': { mb: 0 }
               }}
-            />
-            <Typography variant="caption" color="#ffffff">
-              {cat.label}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+            >
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  bgcolor: cat.color,
+                  borderRadius: '50%',
+                  mr: 1,
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  flexShrink: 0
+                }}
+              />
+              <Typography 
+                variant="caption" 
+                color="#ffffff"
+                sx={{ 
+                  fontSize: '0.75rem',
+                  lineHeight: 1.2
+                }}
+              >
+                {cat.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Paper>
     );
   };
 
@@ -510,142 +750,261 @@ const Graph = () => {
     }
   };
 
+  // Add this new function to fetch Wikipedia information
+  const fetchWikipediaInfo = async (searchTerm) => {
+    setLoadingWiki(true);
+    try {
+      const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          setWikiInfo({ error: 'No Wikipedia article found for this topic.' });
+          return;
+        }
+        throw new Error(`Wikipedia API error: ${response.status}`);
+      }
+      const data = await response.json();
+      setWikiInfo(data);
+    } catch (error) {
+      console.error('Error fetching Wikipedia info:', error);
+      setWikiInfo({ 
+        error: 'Unable to fetch Wikipedia information. Please try again later.' 
+      });
+    } finally {
+      setLoadingWiki(false);
+    }
+  };
+
+  // Update the click handler to fetch Wikipedia info when a node is selected
+  useEffect(() => {
+    if (selectedNode) {
+      // Clean up the search term by removing special characters and formatting
+      const cleanSearchTerm = selectedNode.label
+        .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+        .trim();
+      if (cleanSearchTerm) {
+        fetchWikipediaInfo(cleanSearchTerm);
+      }
+    }
+  }, [selectedNode]);
+
   if (loading) {
     return (
-      <Box p={3} display="flex" justifyContent="center" alignItems="center">
-        <CircularProgress />
+      <Box 
+        sx={{ 
+          height: '100vh', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          bgcolor: '#0a192f'
+        }}
+      >
+        <CircularProgress sx={{ color: '#64ffda' }} />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box p={3} textAlign="center">
-        <Typography color="error" gutterBottom>{error}</Typography>
-        <Button variant="contained" onClick={() => navigate('/dashboard')}>
+      <Box 
+        sx={{ 
+          height: '100vh', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          bgcolor: '#0a192f',
+          p: 3
+        }}
+      >
+        <Typography color="error" variant="h6" gutterBottom align="center">
+          {error}
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => navigate('/dashboard')}
+          sx={{ 
+            mt: 2,
+            bgcolor: '#64ffda',
+            color: '#0a192f',
+            '&:hover': {
+              bgcolor: '#4caf50'
+            }
+          }}
+        >
           Back to Dashboard
         </Button>
       </Box>
     );
   }
 
-  return (
-    <Box sx={{ height: '100vh', bgcolor: '#0a192f', position: 'relative' }}>
-      <Box sx={{ 
-        p: 2, 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        bgcolor: 'rgba(10, 25, 47, 0.8)',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1
-      }}>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/dashboard')}
-          sx={{ color: '#64ffda', borderColor: '#64ffda' }}
-        >
-          Back to Dashboard
-        </Button>
-        <Typography variant="h4" sx={{ color: '#64ffda' }}>
-          {graph?.title}
-        </Typography>
-      </Box>
-
-      <Box sx={{
-        position: 'absolute',
-        top: 80,
-        left: 20,
-        zIndex: 1,
+  const ControlPanel = () => (
+    <Box
+      sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 1,
-        bgcolor: 'rgba(17, 34, 64, 0.9)',
+        gap: 2,
         p: 2,
-        borderRadius: 2
-      }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <TextField
-            size="small"
-            placeholder="Search nodes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: '#ffffff',
-                '& fieldset': { borderColor: '#64ffda' },
-                '&:hover fieldset': { borderColor: '#64ffda' },
-              }
-            }}
-          />
-          <IconButton onClick={handleSearch} sx={{ color: '#64ffda' }}>
-            <SearchIcon />
+        bgcolor: 'rgba(17, 34, 64, 0.95)',
+        borderRadius: 2,
+        width: isMobile ? '100%' : '320px',
+        height: isMobile ? 'auto' : '100%'
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6" sx={{ color: '#64ffda' }}>Controls</Typography>
+        {isMobile && (
+          <IconButton onClick={() => setControlsOpen(false)} sx={{ color: '#64ffda' }}>
+            <CloseIcon />
           </IconButton>
-        </Box>
-        
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+        )}
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search nodes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          InputProps={{
+            endAdornment: searchTerm && (
+              <IconButton
+                size="small"
+                onClick={() => setSearchTerm('')}
+                sx={{ color: '#64ffda' }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              color: '#ffffff',
+              '& fieldset': { borderColor: '#64ffda' },
+              '&:hover fieldset': { borderColor: '#64ffda' },
+              '&.Mui-focused fieldset': { borderColor: '#64ffda' },
+            }
+          }}
+        />
+      </Box>
+
+      <Paper sx={{ bgcolor: 'rgba(10, 25, 47, 0.5)', p: 2, borderRadius: 2 }}>
+        <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+          View Controls
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Tooltip title="Zoom In">
-            <IconButton 
-              onClick={handleZoomIn}
-              sx={{ color: '#64ffda' }}
-            >
+            <IconButton onClick={handleZoomIn} sx={{ color: '#64ffda' }}>
               <ZoomInIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Zoom Out">
-            <IconButton 
-              onClick={handleZoomOut}
-              sx={{ color: '#64ffda' }}
-            >
+            <IconButton onClick={handleZoomOut} sx={{ color: '#64ffda' }}>
               <ZoomOutIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Fit View">
-            <IconButton 
-              onClick={handleFitView}
-              sx={{ color: '#64ffda' }}
-            >
+            <IconButton onClick={handleFitView} sx={{ color: '#64ffda' }}>
               <CenterFocusStrongIcon />
             </IconButton>
           </Tooltip>
-          <Divider orientation="vertical" flexItem sx={{ bgcolor: '#64ffda', opacity: 0.3 }} />
+        </Box>
+      </Paper>
+
+      <Paper sx={{ bgcolor: 'rgba(10, 25, 47, 0.5)', p: 2, borderRadius: 2 }}>
+        <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+          Layout Controls
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Tooltip title={isPhysicsEnabled ? "Pause Physics" : "Resume Physics"}>
-            <IconButton 
-              onClick={togglePhysics}
-              sx={{ color: '#64ffda' }}
-            >
+            <IconButton onClick={togglePhysics} sx={{ color: '#64ffda' }}>
               {isPhysicsEnabled ? <PauseIcon /> : <PlayIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Reset Layout">
-            <IconButton 
-              onClick={resetLayout}
-              sx={{ color: '#64ffda' }}
-            >
+            <IconButton onClick={resetLayout} sx={{ color: '#64ffda' }}>
               <RefreshIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title={`Switch to ${layout === 'force' ? 'Hierarchical' : 'Force'} Layout`}>
-            <IconButton 
-              onClick={toggleLayout}
-              sx={{ color: '#64ffda' }}
-            >
+            <IconButton onClick={toggleLayout} sx={{ color: '#64ffda' }}>
               <ViewModuleIcon />
             </IconButton>
           </Tooltip>
         </Box>
-      </Box>
+      </Paper>
 
       <GraphStats graph={graph} />
       <Legend />
-      <div id="network-graph" style={{ height: '100%', width: '100%', background: '#0a192f' }} />
+    </Box>
+  );
+
+  return (
+    <Box sx={{ 
+      display: 'flex', 
+      height: 'calc(100vh - 64px)',
+      position: 'relative'
+    }}>
+      {/* Controls Panel - Desktop */}
+      {!isMobile && controlsOpen && (
+        <Box sx={{ 
+          width: '320px',
+          height: '100%',
+          overflow: 'auto',
+          borderRight: '1px solid rgba(100, 255, 218, 0.1)'
+        }}>
+          <ControlPanel />
+        </Box>
+      )}
+
+      {/* Graph Area */}
+      <Box sx={{ flex: 1, position: 'relative' }}>
+        <div id="network-graph" style={{ height: '100%', width: '100%' }} />
+      </Box>
+
+      {/* Controls Panel - Mobile */}
+      {isMobile && (
+        <Drawer
+          anchor="left"
+          open={controlsOpen}
+          onClose={() => setControlsOpen(false)}
+          PaperProps={{
+            sx: {
+              bgcolor: 'rgba(10, 25, 47, 0.95)',
+              width: '100%'
+            }
+          }}
+        >
+          <ControlPanel />
+        </Drawer>
+      )}
+
+      {/* Mobile FAB for opening controls */}
+      {isMobile && !controlsOpen && (
+        <Zoom in={!controlsOpen}>
+          <Fab
+            color="primary"
+            aria-label="open controls"
+            onClick={() => setControlsOpen(true)}
+            sx={{
+              position: 'absolute',
+              bottom: 16,
+              right: 16,
+              bgcolor: '#64ffda',
+              color: '#0a192f',
+              '&:hover': {
+                bgcolor: '#4caf50'
+              }
+            }}
+          >
+            <MenuIcon />
+          </Fab>
+        </Zoom>
+      )}
 
       {/* Node Information Dialog */}
-      <Dialog 
+      <Dialog
         open={dialogOpen} 
         onClose={() => setDialogOpen(false)}
         maxWidth="sm"
@@ -654,75 +1013,203 @@ const Graph = () => {
           sx: {
             bgcolor: '#112240',
             color: '#ffffff',
-            borderRadius: 2
+            borderRadius: 2,
+            m: isMobile ? 2 : 4
           }
         }}
       >
         <DialogTitle sx={{ 
-          borderBottom: '1px solid #1d4ed8',
-          color: '#64ffda'
+          borderBottom: '1px solid rgba(100, 255, 218, 0.1)',
+          color: '#64ffda',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          {selectedNode?.label}
+          <Typography variant="h6" component="div" sx={{ 
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {selectedNode?.label}
+          </Typography>
+          <IconButton 
+            onClick={() => setDialogOpen(false)}
+            sx={{ color: '#64ffda' }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" color="#8892b0" gutterBottom>
-            Type: {selectedNode?.type}
-          </Typography>
-          <Typography variant="body1" color="#ffffff">
-            {selectedNode?.description}
-          </Typography>
-          
-          {/* Show connected nodes */}
-          {graph?.edges && (
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="h6" color="#64ffda" gutterBottom>
-                Connections
+          {/* Node Type */}
+          <Paper sx={{ 
+            p: 2, 
+            mb: 2, 
+            bgcolor: 'rgba(10, 25, 47, 0.5)',
+            border: '1px solid rgba(100, 255, 218, 0.1)'
+          }}>
+            <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+              Type
+            </Typography>
+            <Typography variant="body1" color="#ffffff">
+              {selectedNode?.type}
+            </Typography>
+          </Paper>
+
+          {/* Node Description */}
+          <Paper sx={{ 
+            p: 2, 
+            mb: 3, 
+            bgcolor: 'rgba(10, 25, 47, 0.5)',
+            border: '1px solid rgba(100, 255, 218, 0.1)'
+          }}>
+            <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+              Description
+            </Typography>
+            <Typography variant="body1" color="#ffffff">
+              {selectedNode?.description}
+            </Typography>
+          </Paper>
+
+          {/* Wikipedia Information Section */}
+          {selectedNode && (
+            <Paper sx={{ 
+              p: 2, 
+              mb: 3, 
+              bgcolor: 'rgba(10, 25, 47, 0.5)',
+              border: '1px solid rgba(100, 255, 218, 0.1)'
+            }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle2" color="#64ffda">
+                  Detailed Information
+                </Typography>
+                {wikiInfo?.content_urls?.desktop?.page && !wikiInfo.error && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    endIcon={<LaunchIcon />}
+                    onClick={() => window.open(wikiInfo.content_urls.desktop.page, '_blank')}
+                    sx={{ 
+                      color: '#64ffda',
+                      borderColor: '#64ffda',
+                      '&:hover': {
+                        borderColor: '#4caf50',
+                        bgcolor: 'rgba(100, 255, 218, 0.1)'
+                      }
+                    }}
+                  >
+                    View on Wikipedia
+                  </Button>
+                )}
+              </Box>
+              
+              {loadingWiki ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                  <CircularProgress size={24} sx={{ color: '#64ffda' }} />
+                </Box>
+              ) : wikiInfo ? (
+                <>
+                  {wikiInfo.error ? (
+                    <Typography variant="body2" color="#8892b0" sx={{ fontStyle: 'italic' }}>
+                      {wikiInfo.error}
+                    </Typography>
+                  ) : (
+                    <>
+                      {wikiInfo.thumbnail && (
+                        <Box 
+                          component="img"
+                          src={wikiInfo.thumbnail.source}
+                          alt={wikiInfo.title}
+                          sx={{ 
+                            width: '100%',
+                            maxWidth: 300,
+                            height: 'auto',
+                            borderRadius: 1,
+                            mb: 2,
+                            display: 'block',
+                            margin: '0 auto'
+                          }}
+                        />
+                      )}
+                      <Typography variant="body1" color="#ffffff" paragraph>
+                        {wikiInfo.extract}
+                      </Typography>
+                    </>
+                  )}
+                </>
+              ) : (
+                <Typography variant="body2" color="#8892b0" sx={{ fontStyle: 'italic' }}>
+                  No Wikipedia information available for this topic.
+                </Typography>
+              )}
+            </Paper>
+          )}
+
+          {/* Related Nodes Section */}
+          {selectedNode && (
+            <Paper sx={{ 
+              p: 2, 
+              bgcolor: 'rgba(10, 25, 47, 0.5)',
+              border: '1px solid rgba(100, 255, 218, 0.1)'
+            }}>
+              <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+                Related Topics
               </Typography>
-              {graph.edges
-                .filter(edge => 
-                  edge.source === selectedNode?.id || 
-                  edge.target === selectedNode?.id
-                )
-                .map((edge, index) => {
-                  const connectedNode = graph.nodes.find(n => 
-                    n.id === (edge.source === selectedNode?.id ? edge.target : edge.source)
-                  );
-                  return (
+              <Box sx={{ 
+                maxHeight: '200px', 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  bgcolor: 'rgba(10, 25, 47, 0.5)',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  bgcolor: '#64ffda',
+                  borderRadius: '4px',
+                }
+              }}>
+                {graph.nodes
+                  .filter(node => 
+                    node.id !== selectedNode.id && 
+                    (node.type === selectedNode.type || 
+                     graph.edges.some(edge => 
+                       (edge.source === node.id && edge.target === selectedNode.id) ||
+                       (edge.target === node.id && edge.source === selectedNode.id)
+                     ))
+                  )
+                  .map((node, index) => (
                     <Paper 
                       key={index}
                       sx={{ 
-                        p: 1, 
+                        p: 1.5, 
                         mt: 1, 
-                        bgcolor: '#1e293b',
-                        border: '1px solid #1d4ed8'
+                        bgcolor: 'rgba(10, 25, 47, 0.8)',
+                        border: '1px solid rgba(100, 255, 218, 0.1)',
+                        '&:first-of-type': { mt: 0 },
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'rgba(100, 255, 218, 0.1)',
+                        }
+                      }}
+                      onClick={() => {
+                        setSelectedNode(node);
                       }}
                     >
-                      <Typography color="#ffffff">
-                        {edge.source === selectedNode?.id ? 
-                          `${edge.label} → ${connectedNode?.label}` : 
-                          `${connectedNode?.label} → ${edge.label}`}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography color="#ffffff">
+                          {node.label}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#8892b0' }}>
+                          {node.type}
+                        </Typography>
+                      </Box>
                     </Paper>
-                  );
-                })}
-            </Box>
+                  ))}
+              </Box>
+            </Paper>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button 
-            onClick={() => setDialogOpen(false)}
-            variant="contained"
-            sx={{ 
-              bgcolor: '#64ffda',
-              color: '#0a192f',
-              '&:hover': {
-                bgcolor: '#4caf50'
-              }
-            }}
-          >
-            Close
-          </Button>
-        </DialogActions>
       </Dialog>
     </Box>
   );
