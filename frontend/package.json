@@ -7,13 +7,23 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.4",
+<<<<<<< HEAD
     "@mui/lab": "^6.0.0-beta.27",
     "@mui/material": "^6.4.4",
+=======
+    "@mui/lab": "^6.0.0-beta.29",
+    "@mui/material": "^6.4.4",
+    "@mui/x-date-pickers": "^7.27.1",
+>>>>>>> 17e6718 (initial commit)
     "@reduxjs/toolkit": "^2.5.1",
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "cra-template": "1.2.0",
     "d3": "^7.9.0",
+<<<<<<< HEAD
+=======
+    "dayjs": "^1.11.13",
+>>>>>>> 17e6718 (initial commit)
     "framer-motion": "^12.4.2",
     "gsap": "^3.12.7",
     "react": "^18.2.0",

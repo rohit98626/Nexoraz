@@ -38,11 +38,21 @@ const CreateGraph = () => {
 
   const handleCreateGraph = async () => {
     try {
+<<<<<<< HEAD
       // First, generate detailed graph data
       const graphData = await generateDetailedGraph(graphData.title, graphData.description);
 
       // Then create the graph with the generated data
       const response = await fetch('http://localhost:5000/api/graphs', {
+=======
+      if (!graphData.title || !graphData.description) {
+        setError('Both title and description are required');
+        return;
+      }
+
+      // Generate graph data using both title and description
+      const response = await fetch('http://localhost:5000/api/generate-graph-data', {
+>>>>>>> 17e6718 (initial commit)
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,9 +61,20 @@ const CreateGraph = () => {
         body: JSON.stringify({
           title: graphData.title,
           description: graphData.description,
+<<<<<<< HEAD
           type: graphData.type || 'concept',
           nodes: graphData.nodes,
           edges: graphData.edges
+=======
+          type: graphData.type,
+          settings: {
+            maxNodes: 12,
+            maxEdges: 15,
+            mainNode: graphData.title,
+            context: graphData.description,
+            graphType: graphData.type
+          }
+>>>>>>> 17e6718 (initial commit)
         })
       });
 

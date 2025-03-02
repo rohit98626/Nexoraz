@@ -66,7 +66,11 @@ try:
         raise ValueError("GOOGLE_API_KEY not found in environment variables")
     
     genai.configure(api_key=GOOGLE_API_KEY)
+<<<<<<< HEAD
     model = genai.GenerativeModel('gemini-1.5-pro')
+=======
+    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+>>>>>>> 17e6718 (initial commit)
     logger.info("Gemini API configured successfully")
 except Exception as e:
     logger.error(f"Failed to configure Gemini: {e}")
