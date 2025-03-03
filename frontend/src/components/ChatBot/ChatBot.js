@@ -9,12 +9,15 @@ import {
   Paper,
   Avatar,
   Button,
+  Chip,
 } from '@mui/material';
 import {
   Chat as ChatIcon,
   Close as CloseIcon,
   Send as SendIcon,
   Help as HelpIcon,
+  Add as AddIcon,
+  AutoGraph as AutoGraphIcon,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -122,6 +125,129 @@ const predefinedAnswers = {
   'when was nexoraz founded': "NEXORAZ was founded in 2023 by Mr. Rohit Prajapat 📅\n\nSince then, we've been dedicated to revolutionizing knowledge visualization and management.",
 };
 
+// Add more graph-specific responses
+const graphSpecificAnswers = {
+  'graph types': `Our Knowledge Graph supports various types:\n
+  📊 Concept Maps - For organizing ideas and concepts
+  🔄 Process Flows - For visualizing workflows
+  👥 Organization Charts - For hierarchical structures
+  🎯 Project Dependencies - For task relationships
+  🧠 Research Maps - For academic research
+  🌐 Knowledge Networks - For complex relationships\n
+  Which type interests you?`,
+
+  'node connections': `To create meaningful connections in your graph:\n
+  1. Click on the source node
+  2. Drag to create a connection
+  3. Select the relationship type:
+     - "is part of"
+     - "relates to"
+     - "depends on"
+     - "influences"
+     - "causes"
+  4. Add optional description
+  5. Click Save\n
+  Need more specific help?`,
+
+  'graph analysis': `I can help analyze your graph for:\n
+  📈 Node Distribution
+  🔗 Connection Patterns
+  🎯 Central Concepts
+  🔍 Knowledge Gaps
+  📊 Structural Balance\n
+  What would you like to analyze?`,
+
+  'graph tips': `Pro tips for better knowledge graphs:\n
+  1. Start with a central concept
+  2. Use clear, concise node labels
+  3. Create meaningful relationships
+  4. Group related nodes together
+  5. Use different node types for clarity
+  6. Add descriptions for complex concepts
+  7. Regular reorganize for clarity\n
+  Want specific examples?`,
+
+  'visualization options': `Customize your graph visualization:\n
+  🎨 Node Colors - By type or category
+  📏 Node Size - By importance
+  🔤 Font Styles - For readability
+  ↔️ Layout Options:
+    - Force-directed
+    - Hierarchical
+    - Circular
+    - Grid\n
+  Which aspect would you like to customize?`,
+
+  'export graph': `Export your knowledge graph:\n
+  1. 📸 PNG - For presentations
+  2. 📄 PDF - For documentation
+  3. 📊 JSON - For data backup
+  4. 📎 CSV - For spreadsheet analysis\n
+  Choose format and click Export in graph controls.`,
+
+  'graph privacy': `Manage graph privacy:\n
+  🔒 Private - Only you can access
+  👥 Shared - Specific users can view/edit
+  🌐 Public - Anyone with link can view\n
+  Current setting shown in graph settings.`,
+
+  'graph collaboration': `Collaborate on your graph:\n
+  1. Share graph link
+  2. Set permissions:
+     - View only
+     - Edit nodes
+     - Full access
+  3. Real-time updates
+  4. Comment on nodes
+  5. Track changes\n
+  Need help with sharing?`,
+
+  'graph templates': `Start with our templates:\n
+  📚 Academic Research
+  💼 Project Management
+  🎓 Study Notes
+  💡 Brainstorming
+  🏢 Organization Structure\n
+  Want to try a template?`,
+
+  'search in graph': `Search your graph effectively:\n
+  1. Use the search bar (Ctrl+F)
+  2. Filter by:
+     - Node type
+     - Creation date
+     - Connections
+     - Keywords
+  3. Click to highlight results
+  4. Use advanced filters\n
+  Need search examples?`,
+
+  'graph shortcuts': `Keyboard shortcuts for faster work:\n
+  Ctrl+N - New node
+  Ctrl+E - New edge
+  Ctrl+F - Search
+  Ctrl+Z - Undo
+  Ctrl+S - Save
+  Space - Center graph
+  +/- - Zoom in/out\n
+  Want the full list?`,
+
+  'graph limits': `Free account limits:\n
+  - 10 graphs per day
+  - 100 nodes per graph
+  - Basic templates
+  - Standard layouts\n
+  Upgrade to Premium for unlimited access!`,
+
+  'premium features': `Premium features include:\n
+  ✨ Unlimited graphs
+  🎨 Advanced templates
+  🤖 AI-powered insights
+  📊 Advanced analytics
+  🔄 Version history
+  🔗 API access\n
+  Interested in upgrading?`
+};
+
 const Message = ({ text, isBot, timestamp, isHelp }) => (
   <Box
     sx={{
@@ -176,11 +302,235 @@ const Message = ({ text, isBot, timestamp, isHelp }) => (
   </Box>
 );
 
+// Add QuickActionButton component
+const QuickActionButton = ({ label, icon, onClick }) => (
+  <Button
+    variant="outlined"
+    size="small"
+    startIcon={icon}
+    onClick={onClick}
+    sx={{
+      m: 0.5,
+      color: '#64ffda',
+      borderColor: '#233554',
+      '&:hover': {
+        borderColor: '#64ffda',
+        bgcolor: 'rgba(100, 255, 218, 0.1)',
+      },
+    }}
+  >
+    {label}
+  </Button>
+);
+
+// Add GraphLoadingIndicator component
+const GraphLoadingIndicator = () => (
+  <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <Box sx={{ position: 'relative', width: 120, height: 80 }}>
+      {/* Central Node */}
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.5, 1, 0.5],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 16,
+          height: 16,
+          borderRadius: '50%',
+          background: '#64ffda',
+        }}
+      />
+      
+      {/* Satellite Nodes */}
+      {[0, 72, 144, 216, 288].map((degree, index) => (
+        <motion.div
+          key={index}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.7, 0.3],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: index * 0.2,
+            ease: "easeInOut"
+          }}
+          style={{
+            position: 'absolute',
+            left: `${50 + 35 * Math.cos(degree * Math.PI / 180)}%`,
+            top: `${50 + 35 * Math.sin(degree * Math.PI / 180)}%`,
+            width: 12,
+            height: 12,
+            borderRadius: '50%',
+            background: '#64ffda',
+          }}
+        />
+      ))}
+      
+      {/* Connecting Lines */}
+      {[0, 72, 144, 216, 288].map((degree, index) => (
+        <motion.div
+          key={`line-${index}`}
+          animate={{
+            opacity: [0.1, 0.3, 0.1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: index * 0.2,
+            ease: "easeInOut"
+          }}
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: 35,
+            height: 2,
+            background: '#64ffda',
+            transformOrigin: '0% 50%',
+            transform: `rotate(${degree}deg)`,
+          }}
+        />
+      ))}
+    </Box>
+  </Box>
+);
+
+// Add AI integration
+const processWithAI = async (userInput, conversationHistory, graphContext) => {
+  try {
+    const response = await axios.post('/api/chat/process', {
+      input: userInput,
+      history: conversationHistory,
+      context: {
+        currentGraph: graphContext,
+        userPreferences: getUserPreferences(),
+        graphComplexity: calculateGraphComplexity(graphContext),
+        timestamp: new Date().toISOString()
+      }
+    });
+    return response.data.response;
+  } catch (error) {
+    console.error('AI processing error:', error);
+    return findBestMatch(userInput); // Fallback to predefined responses
+  }
+};
+
+// Add helper functions
+const calculateGraphComplexity = (graph) => {
+  if (!graph) return 'simple';
+  const nodeCount = graph.nodes?.length || 0;
+  const edgeCount = graph.edges?.length || 0;
+  
+  if (nodeCount > 50 || edgeCount > 100) return 'complex';
+  if (nodeCount > 20 || edgeCount > 40) return 'moderate';
+  return 'simple';
+};
+
+const getUserPreferences = () => {
+  return {
+    layout: localStorage.getItem('preferredLayout') || 'force',
+    theme: localStorage.getItem('preferredTheme') || 'dark',
+    nodeSize: localStorage.getItem('preferredNodeSize') || 'medium',
+    edgeStyle: localStorage.getItem('preferredEdgeStyle') || 'curved'
+  };
+};
+
+const getRandomResponse = (responses) => {
+  if (Array.isArray(responses)) {
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  return responses;
+};
+
+const findBestMatch = (input) => {
+  const userQuestion = input.toLowerCase();
+
+  // Check for graph-specific answers first
+  for (const [key, value] of Object.entries(graphSpecificAnswers)) {
+    if (userQuestion.includes(key)) {
+      return value;
+    }
+  }
+
+  // Check for greetings
+  for (const [key, value] of Object.entries(greetings)) {
+    if (userQuestion.includes(key)) {
+      return getRandomResponse(value);
+    }
+  }
+
+  // Check for common phrases
+  for (const [key, value] of Object.entries(commonPhrases)) {
+    if (userQuestion.includes(key)) {
+      return value;
+    }
+  }
+
+  // Check predefined answers
+  for (const [key, value] of Object.entries(predefinedAnswers)) {
+    if (userQuestion.includes(key)) {
+      return value;
+    }
+  }
+
+  // Fallback response
+  return `I'm here to help with your knowledge graph! 🤔\n
+Could you be more specific about what you need?\n
+You can ask about:
+📊 Graph creation and types
+🔗 Node connections
+🎨 Visualization options
+👥 Collaboration features
+🔍 Search and navigation
+⚙️ Settings and customization\n
+Or type 'help' for a full list of topics!`;
+};
+
+const determineCategory = (input) => {
+  const text = input.toLowerCase();
+  
+  if (text.includes('graph') || text.includes('node') || text.includes('edge') || text.includes('connection')) {
+    return 'graphs';
+  }
+  if (text.includes('visualize') || text.includes('display') || text.includes('show') || text.includes('layout')) {
+    return 'visualization';
+  }
+  if (text.includes('share') || text.includes('team') || text.includes('collaborate')) {
+    return 'collaboration';
+  }
+  if (text.includes('setting') || text.includes('config') || text.includes('preference')) {
+    return 'settings';
+  }
+  if (text.includes('node') || text.includes('connect') || text.includes('relationship')) {
+    return 'nodes';
+  }
+  return 'general';
+};
+
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
-      text: "👋 Hi! I'm your NEXORAZ Assistant!\n\nI can help you with:\n✨ Creating graphs\n🔗 Adding nodes\n👥 Collaboration\n❓ General questions\n\nJust type your question, and I'll be happy to help! 😊",
+      text: `Welcome to NEXORAZ Knowledge Graph Assistant!\n
+I'm here to help you create and manage your knowledge graphs.\n
+You can ask me about:
+📊 Creating different types of graphs
+🔗 Adding nodes and connections
+🎨 Customizing visualizations
+👥 Collaborating with others
+🔍 Searching and analyzing
+⚙️ Settings and features\n
+Just type your question, and I'll guide you! 😊`,
       isBot: true,
       timestamp: new Date(),
     },
@@ -190,6 +540,26 @@ const ChatBot = () => {
   const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const currentGraph = useSelector(state => state.graph.currentGraph);
+  const [isTyping, setIsTyping] = useState(false);
+  const [messageCategory, setMessageCategory] = useState('general');
+  const [suggestedQuestions, setSuggestedQuestions] = useState([
+    'How do I create a new graph?',
+    'What are the different node types?',
+    'How can I share my graph?',
+    'Tell me about premium features'
+  ]);
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [aiEnabled, setAiEnabled] = useState(true);
+
+  // Add categories for better organization
+  const messageCategories = {
+    general: '💬 General',
+    graphs: '📊 Graphs',
+    nodes: '🔗 Nodes',
+    visualization: '🎨 Visualization',
+    collaboration: '👥 Collaboration',
+    settings: '⚙️ Settings'
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -198,41 +568,6 @@ const ChatBot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const getRandomResponse = (responses) => {
-    if (Array.isArray(responses)) {
-      return responses[Math.floor(Math.random() * responses.length)];
-    }
-    return responses;
-  };
-
-  const findBestMatch = (input) => {
-    const userQuestion = input.toLowerCase();
-
-    // Check for greetings first
-    for (const [key, value] of Object.entries(greetings)) {
-      if (userQuestion.includes(key)) {
-        return getRandomResponse(value);
-      }
-    }
-
-    // Check for common phrases
-    for (const [key, value] of Object.entries(commonPhrases)) {
-      if (userQuestion.includes(key)) {
-        return value;
-      }
-    }
-
-    // Check predefined answers
-    for (const [key, value] of Object.entries(predefinedAnswers)) {
-      if (userQuestion.includes(key)) {
-        return value;
-      }
-    }
-
-    // If no match found, provide a friendly fallback
-    return "I'm not quite sure about that. 🤔 But I'd love to help! Could you:\n1. Rephrase your question?\n2. Use simpler terms?\n3. Or click the 'Contact Support' button below for personalized help!";
-  };
 
   const getAIRecommendations = async (query) => {
     try {
@@ -243,15 +578,18 @@ const ChatBot = () => {
           activity: 'creating_graph',
           graphType: currentGraph?.type || 'general',
           domain: currentGraph?.domain || 'general',
-          experience: 'beginner'
+          experience: 'beginner',
+          currentNodes: currentGraph?.nodes?.length || 0,
+          currentEdges: currentGraph?.edges?.length || 0,
+          graphComplexity: calculateGraphComplexity(currentGraph),
+          userPreferences: getUserPreferences()
         }
       });
 
-      const recommendations = response.data;
-      return recommendations.general;
+      return response.data.recommendations;
     } catch (error) {
       console.error('AI recommendation error:', error);
-      return "I encountered an error while generating recommendations. Please try again.";
+      return "I encountered an error while analyzing your graph. Please try again or contact support for assistance.";
     } finally {
       setIsAnalyzing(false);
     }
@@ -275,6 +613,7 @@ const ChatBot = () => {
     }
   };
 
+  // Enhanced handleSend with AI processing
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -282,47 +621,133 @@ const ChatBot = () => {
       text: input,
       isBot: false,
       timestamp: new Date(),
+      category: messageCategory
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setIsTyping(true);
 
-    // Check if user is requesting AI features
-    const userInput = input.toLowerCase();
-    if (userInput.includes('recommend') || userInput.includes('suggest')) {
-      const aiRecommendations = await getAIRecommendations(input);
-      const botMessage = {
-        text: aiRecommendations,
+    try {
+      let response;
+      const userInput = input.toLowerCase();
+      
+      // Update conversation history
+      const updatedHistory = [
+        ...conversationHistory,
+        { role: 'user', content: input }
+      ].slice(-10); // Keep last 10 messages for context
+      setConversationHistory(updatedHistory);
+
+      if (aiEnabled) {
+        // Process with AI
+        response = await processWithAI(
+          input,
+          updatedHistory,
+          currentGraph
+        );
+      } else {
+        // Fallback to traditional response matching
+        if (userInput.includes('recommend') || userInput.includes('suggest')) {
+          response = await getAIRecommendations(input);
+        } else if (userInput.includes('analyze') && currentGraph) {
+          response = await analyzeCurrentGraph();
+        } else {
+          response = findBestMatch(userInput);
+        }
+      }
+
+      // Update suggested questions based on AI response
+      const newSuggestions = await generateAISuggestions(input, response);
+      setSuggestedQuestions(newSuggestions);
+
+      // Add response to conversation history
+      setConversationHistory(prev => [
+        ...prev,
+        { role: 'assistant', content: response }
+      ]);
+
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [...prev, {
+          text: response,
+          isBot: true,
+          timestamp: new Date(),
+          category: determineCategory(input)
+        }]);
+      }, 1000);
+
+    } catch (error) {
+      console.error('Error processing message:', error);
+      setIsTyping(false);
+      setMessages(prev => [...prev, {
+        text: "I encountered an error. Please try again or contact support.",
         isBot: true,
         timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMessage]);
-      return;
+        category: 'general',
+        isError: true
+      }]);
     }
+  };
 
-    if (userInput.includes('analyze') && currentGraph) {
-      const analysis = await analyzeCurrentGraph();
-      const botMessage = {
-        text: analysis || "I couldn't analyze the graph at this moment. Please try again.",
-        isBot: true,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMessage]);
-      return;
+  // AI-powered suggestion generation
+  const generateAISuggestions = async (input, lastResponse) => {
+    try {
+      const response = await axios.post('/api/chat/suggestions', {
+        input,
+        lastResponse,
+        context: {
+          currentGraph,
+          conversationHistory,
+          userPreferences: getUserPreferences()
+        }
+      });
+      return response.data.suggestions;
+    } catch (error) {
+      console.error('Error generating suggestions:', error);
+      return generateDefaultSuggestions(determineCategory(input));
     }
+  };
 
-    // Regular chatbot response
-    const answer = findBestMatch(userInput);
-    const botMessage = {
-      text: answer,
-      isBot: true,
-      timestamp: new Date(),
-      isHelp: !answer,
-    };
+  const generateDefaultSuggestions = (category) => {
+    switch (category) {
+      case 'graphs':
+        return [
+          'How do I add more nodes?',
+          'Can I change the layout?',
+          'How to save my graph?'
+        ];
+      case 'nodes':
+        return [
+          'What node types are available?',
+          'How to connect nodes?',
+          'Can I customize node appearance?'
+        ];
+      default:
+        return [
+          'Tell me about graph types',
+          'How to start a new project?',
+          'What are the premium features?'
+        ];
+    }
+  };
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, botMessage]);
-    }, 500);
+  // Add quick action handler
+  const handleQuickAction = (action) => {
+    switch (action) {
+      case 'new_graph':
+        navigate('/create-graph');
+        break;
+      case 'templates':
+        setInput('Show me graph templates');
+        handleSend();
+        break;
+      case 'help':
+        setInput('What can you help me with?');
+        handleSend();
+        break;
+      // Add more actions...
+    }
   };
 
   return (
@@ -375,15 +800,27 @@ const ChatBot = () => {
             </IconButton>
           </Box>
 
-          <Box
-            sx={{
-              flexGrow: 1,
-              overflowY: 'auto',
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
+          {/* Quick Actions */}
+          <Box sx={{ p: 1, borderBottom: '1px solid #233554', display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            <QuickActionButton
+              label="New Graph"
+              icon={<AddIcon />}
+              onClick={() => handleQuickAction('new_graph')}
+            />
+            <QuickActionButton
+              label="Templates"
+              icon={<AutoGraphIcon />}
+              onClick={() => handleQuickAction('templates')}
+            />
+            <QuickActionButton
+              label="Help"
+              icon={<HelpIcon />}
+              onClick={() => handleQuickAction('help')}
+            />
+          </Box>
+
+          {/* Messages Area */}
+          <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
             <AnimatePresence>
               {messages.map((message, index) => (
                 <motion.div
@@ -395,24 +832,49 @@ const ChatBot = () => {
                   <Message {...message} />
                 </motion.div>
               ))}
+              {isTyping && <GraphLoadingIndicator />}
             </AnimatePresence>
             <div ref={messagesEndRef} />
           </Box>
 
-          <Box
-            sx={{
-              p: 2,
-              borderTop: '1px solid #233554',
-              display: 'flex',
-              gap: 1,
-            }}
-          >
+          {/* Suggested Questions */}
+          {suggestedQuestions.length > 0 && (
+            <Box sx={{ p: 1, borderTop: '1px solid #233554' }}>
+              <Typography variant="caption" color="#64ffda" sx={{ pl: 1 }}>
+                Suggested Questions:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, p: 1 }}>
+                {suggestedQuestions.map((question, index) => (
+                  <Chip
+                    key={index}
+                    label={question}
+                    onClick={() => {
+                      setInput(question);
+                      handleSend();
+                    }}
+                    sx={{
+                      color: '#ccd6f6',
+                      bgcolor: '#112240',
+                      '&:hover': {
+                        bgcolor: '#1a365d',
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* Input Area */}
+          <Box sx={{ p: 2, borderTop: '1px solid #233554', display: 'flex', gap: 1 }}>
             <TextField
               fullWidth
               placeholder="Type your question..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              multiline
+              maxRows={3}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: '#ccd6f6',
@@ -424,7 +886,7 @@ const ChatBot = () => {
             />
             <IconButton
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() || isTyping}
               sx={{
                 color: '#64ffda',
                 '&.Mui-disabled': { color: '#233554' },

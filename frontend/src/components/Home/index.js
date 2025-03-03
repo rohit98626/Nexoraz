@@ -221,7 +221,7 @@ const Home = () => {
                     letterSpacing: '-1px'
                   }}
                 >
-                  NEXORA
+                  NEXORAZ
                 </Typography>
                 <Typography 
                   variant="h2" 

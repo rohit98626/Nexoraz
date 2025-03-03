@@ -6,55 +6,89 @@ import {
   Grid,
   Card,
   CardContent,
-  CardMedia,
-  Button,
+  Chip,
 } from '@mui/material';
 import {
   AccountTree as GraphIcon,
-  Psychology as AIIcon,
-  Share as CollaborateIcon,
-  Speed as PerformanceIcon,
-  Security as SecurityIcon,
-  Visibility as VisualizationIcon,
+  Search as SearchIcon,
+  Sort as SortIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Favorite as FavoriteIcon,
+  Add as CreateIcon,
+  FilterList as FilterIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 
 const features = [
   {
-    title: 'Dynamic Graph Creation',
-    description: 'Create and modify knowledge graphs in real-time with an intuitive interface',
+    title: 'Knowledge Graph Creation',
+    description: 'Create detailed knowledge graphs with nodes and edges to visualize complex relationships',
     icon: <GraphIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    status: 'Available',
+    details: [
+      'Interactive graph interface',
+      'Node and edge creation',
+      'Custom graph titles and descriptions'
+    ]
   },
   {
-    title: 'AI-Powered Insights',
-    description: 'Leverage Gemini AI to analyze and enhance your knowledge graphs automatically',
-    icon: <AIIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    title: 'Advanced Search & Filtering',
+    description: 'Powerful search capabilities to find and filter your knowledge graphs',
+    icon: <SearchIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    status: 'Available',
+    details: [
+      'Full-text search',
+      'Filter by graph type',
+      'Sort by date, name, or nodes'
+    ]
   },
   {
-    title: 'Interactive Visualization',
-    description: 'Visualize complex relationships with dynamic, interactive graph layouts',
-    icon: <VisualizationIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    title: 'Graph Management',
+    description: 'Comprehensive tools to manage your knowledge graphs',
+    icon: <EditIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    status: 'Available',
+    details: [
+      'Edit existing graphs',
+      'Delete graphs',
+      'View graph statistics'
+    ]
   },
   {
-    title: 'Secure Access',
-    description: 'Enterprise-grade security with JWT authentication and data encryption',
-    icon: <SecurityIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    title: 'Organization Features',
+    description: 'Keep your graphs organized and easily accessible',
+    icon: <FilterIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    status: 'Available',
+    details: [
+      'Favorite graphs',
+      'Graph categorization',
+      'Creation date tracking'
+    ]
   },
   {
-    title: 'High Performance',
-    description: 'Built with optimized algorithms for smooth handling of large graphs',
-    icon: <PerformanceIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    title: 'Graph Types',
+    description: 'Different types of graphs for various use cases',
+    icon: <SortIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    status: 'Available',
+    details: [
+      'Concept graphs',
+      'Process graphs',
+      'System graphs'
+    ]
   },
   {
-    title: 'Collaboration Tools',
-    description: 'Share and collaborate on knowledge graphs with team members',
-    icon: <CollaborateIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    title: 'User Dashboard',
+    description: 'Centralized dashboard to manage all your knowledge graphs',
+    icon: <CreateIcon sx={{ fontSize: 40, color: '#64ffda' }} />,
+    status: 'Available',
+    details: [
+      'Graph overview',
+      'Quick actions',
+      'Graph statistics'
+    ]
   },
 ];
 
 const Features = () => {
-  const navigate = useNavigate();
-
   return (
     <Box
       sx={{
@@ -69,12 +103,23 @@ const Features = () => {
           variant="h2"
           align="center"
           sx={{
-            mb: 6,
+            mb: 2,
             fontWeight: 'bold',
             color: '#64ffda',
           }}
         >
           Features
+        </Typography>
+        
+        <Typography
+          variant="h6"
+          align="center"
+          sx={{
+            mb: 6,
+            color: '#8892b0',
+          }}
+        >
+          Discover what NEXORAZ has to offer
         </Typography>
 
         <Grid container spacing={4}>
@@ -87,10 +132,11 @@ const Features = () => {
                   flexDirection: 'column',
                   bgcolor: '#112240',
                   border: '1px solid #233554',
-                  transition: 'transform 0.2s',
+                  transition: 'all 0.3s ease',
                   '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                    transform: 'translateY(-8px)',
+                    boxShadow: '0 10px 30px rgba(100, 255, 218, 0.1)',
+                    border: '1px solid rgba(100, 255, 218, 0.2)',
                   },
                 }}
               >
@@ -98,27 +144,59 @@ const Features = () => {
                   <Box
                     sx={{
                       display: 'flex',
-                      justifyContent: 'center',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
                       mb: 2,
                     }}
                   >
                     {feature.icon}
+                    <Chip 
+                      label={feature.status}
+                      size="small"
+                      sx={{ 
+                        bgcolor: 'rgba(100, 255, 218, 0.1)',
+                        color: '#64ffda',
+                        border: '1px solid rgba(100, 255, 218, 0.2)'
+                      }}
+                    />
                   </Box>
                   <Typography
                     gutterBottom
                     variant="h5"
                     component="h2"
-                    align="center"
-                    sx={{ color: '#ccd6f6' }}
+                    sx={{ 
+                      color: '#ccd6f6',
+                      mb: 2,
+                      fontWeight: 600
+                    }}
                   >
                     {feature.title}
                   </Typography>
                   <Typography
-                    align="center"
-                    sx={{ color: '#8892b0' }}
+                    sx={{ 
+                      color: '#8892b0',
+                      mb: 2
+                    }}
                   >
                     {feature.description}
                   </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                    {feature.details.map((detail, idx) => (
+                      <Chip
+                        key={idx}
+                        label={detail}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(100, 255, 218, 0.05)',
+                          color: '#8892b0',
+                          border: '1px solid rgba(100, 255, 218, 0.1)',
+                          '&:hover': {
+                            bgcolor: 'rgba(100, 255, 218, 0.1)',
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>

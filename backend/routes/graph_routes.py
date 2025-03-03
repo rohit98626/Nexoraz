@@ -14,11 +14,16 @@ def create_graph():
         current_user_id = get_jwt_identity()
         user = db.users.find_one({'_id': ObjectId(current_user_id)})
         
-        print(f"Current user graph count: {user.get('graphs_created_today', 0)}")  # Debug log
-        
         # Check if user has reached their daily limit
         if not user.get('is_premium', False):
             graphs_today = user.get('graphs_created_today', 0)
+            current_date = datetime.utcnow()
+            last_graph_date = user.get('last_graph_date')
+
+            # Reset counter if it's a new day
+            if not last_graph_date or last_graph_date.date() != current_date.date():
+                graphs_today = 0
+            
             if graphs_today >= 10:  # Free user limit
                 return jsonify({
                     'error': 'Daily graph limit reached. Please upgrade to premium for unlimited graphs.'
@@ -37,7 +42,10 @@ def create_graph():
             'description': description,
             'user_id': current_user_id,
             'created_at': datetime.utcnow(),
-            'updated_at': datetime.utcnow()
+            'updated_at': datetime.utcnow(),
+            'type': data.get('type', 'concept'),
+            'nodes': data.get('nodes', []),
+            'edges': data.get('edges', [])
         }
 
         # Insert the graph
@@ -67,19 +75,15 @@ def create_graph():
                     '$set': {'last_graph_date': current_date}
                 }
             )
-        
-        print(f"Update result: {update_result.modified_count}")  # Debug log
 
-        # Fetch updated graph usage for response
+        # Return updated graph count along with the graph
         updated_user = db.users.find_one({'_id': ObjectId(current_user_id)})
-        print(f"Updated user graph count: {updated_user.get('graphs_created_today', 0)}")  # Debug log
-        
         graph['graphs_created_today'] = updated_user.get('graphs_created_today', 0)
 
         return jsonify(graph), 201
 
     except Exception as e:
-        print(f"Error creating graph: {str(e)}")  # Add logging
+        print(f"Error creating graph: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @graph_routes.route('/api/graphs', methods=['GET'])

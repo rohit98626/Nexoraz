@@ -117,12 +117,12 @@ const Contact = () => {
     {
       icon: <PhoneIcon sx={{ fontSize: 32 }} />,
       title: 'Phone',
-      content: '+1 (555) 123-4567'
+      content: '+91 7357707100'
     },
     {
       icon: <LocationIcon sx={{ fontSize: 32 }} />,
       title: 'Location',
-      content: 'New York, NY 10001'
+      content: 'Vadodara, Gujarat 390019'
     }
   ];
 

@@ -101,6 +101,7 @@ const Navbar = () => {
   const navItems = [
     { name: 'Home', path: '/dashboard' },
     { name: 'Features', path: '/features' },
+    { name: 'Updates', path: '/updates' },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: '/contact' }
   ];

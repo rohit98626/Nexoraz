@@ -35,7 +35,8 @@ import {
   Refresh as RefreshIcon,
   ViewModule as ViewModuleIcon,
   Close as CloseIcon,
-  Launch as LaunchIcon
+  Launch as LaunchIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 
 const Graph = () => {
@@ -343,7 +344,7 @@ const Graph = () => {
           setDialogOpen(true);
         }
       });
-      
+
       // Add hover event handler for tooltips
       networkInstance.on('hoverNode', (params) => {
         container.style.cursor = 'pointer';
@@ -622,12 +623,12 @@ const Graph = () => {
           bgcolor: 'rgba(10, 25, 47, 0.5)'
         }}>
           <Typography variant="caption" color="#64ffda" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Node Types
-          </Typography>
+          Node Types
+        </Typography>
         </Box>
         
         <Box sx={{ p: 1.5 }}>
-          {categories.map((cat) => (
+        {categories.map((cat) => (
             <Box
               key={cat.type}
               sx={{
@@ -641,7 +642,7 @@ const Graph = () => {
                 sx={{
                   width: 12,
                   height: 12,
-                  bgcolor: cat.color,
+                bgcolor: cat.color,
                   borderRadius: '50%',
                   mr: 1,
                   border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -656,11 +657,11 @@ const Graph = () => {
                   lineHeight: 1.2
                 }}
               >
-                {cat.label}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
+              {cat.label}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
       </Paper>
     );
   };
@@ -808,10 +809,10 @@ const Graph = () => {
       <Box 
         sx={{ 
           height: '100vh', 
-          display: 'flex', 
+        display: 'flex', 
           flexDirection: 'column', 
           justifyContent: 'center', 
-          alignItems: 'center',
+        alignItems: 'center',
           bgcolor: '#0a192f',
           p: 3
         }}
@@ -840,102 +841,224 @@ const Graph = () => {
   const ControlPanel = () => (
     <Box
       sx={{
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        zIndex: 1000,
         display: 'flex',
         flexDirection: 'column',
         gap: 2,
-        p: 2,
-        bgcolor: 'rgba(17, 34, 64, 0.95)',
-        borderRadius: 2,
-        width: isMobile ? '100%' : '320px',
-        height: isMobile ? 'auto' : '100%'
+        width: '300px'
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" sx={{ color: '#64ffda' }}>Controls</Typography>
-        {isMobile && (
-          <IconButton onClick={() => setControlsOpen(false)} sx={{ color: '#64ffda' }}>
-            <CloseIcon />
-          </IconButton>
-        )}
-      </Box>
+      <Button
+        variant="contained"
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate('/dashboard')}
+        sx={{
+          bgcolor: 'rgba(17, 34, 64, 0.95)',
+          color: '#64ffda',
+          border: '1px solid rgba(100, 255, 218, 0.1)',
+          '&:hover': {
+            bgcolor: 'rgba(100, 255, 218, 0.1)',
+          },
+          textTransform: 'none',
+          fontSize: '0.9rem',
+          py: 1,
+          width: '100%'
+        }}
+      >
+        Back to Dashboard
+      </Button>
 
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <TextField
+      {/* Search Section */}
+      <Box sx={{ p: 2 }}>
+          <TextField
           fullWidth
-          size="small"
-          placeholder="Search nodes..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            size="small"
+            placeholder="Search nodes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           InputProps={{
-            endAdornment: searchTerm && (
-              <IconButton
-                size="small"
-                onClick={() => setSearchTerm('')}
-                sx={{ color: '#64ffda' }}
-              >
-                <CloseIcon />
-              </IconButton>
-            )
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              color: '#ffffff',
-              '& fieldset': { borderColor: '#64ffda' },
-              '&:hover fieldset': { borderColor: '#64ffda' },
-              '&.Mui-focused fieldset': { borderColor: '#64ffda' },
+            sx: {
+              bgcolor: 'rgba(10, 25, 47, 0.5)',
+              '& fieldset': {
+                borderColor: 'rgba(100, 255, 218, 0.2)'
+              }
             }
           }}
-        />
-      </Box>
-
-      <Paper sx={{ bgcolor: 'rgba(10, 25, 47, 0.5)', p: 2, borderRadius: 2 }}>
-        <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '&:hover fieldset': { borderColor: '#64ffda' },
+              '&.Mui-focused fieldset': { borderColor: '#64ffda' },
+              }
+            }}
+          />
+        </Box>
+        
+      {/* View Controls Section */}
+      <Box sx={{ px: 2, pb: 2 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: '#64ffda',
+            mb: 1,
+            fontSize: '0.9rem'
+          }}
+        >
           View Controls
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: 1,
+          '& .MuiIconButton-root': {
+            bgcolor: 'rgba(10, 25, 47, 0.5)',
+            border: '1px solid rgba(100, 255, 218, 0.1)',
+            borderRadius: 1,
+            color: '#64ffda',
+            '&:hover': {
+              bgcolor: 'rgba(100, 255, 218, 0.1)'
+            }
+          }
+        }}>
           <Tooltip title="Zoom In">
-            <IconButton onClick={handleZoomIn} sx={{ color: '#64ffda' }}>
+            <IconButton onClick={handleZoomIn}>
               <ZoomInIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Zoom Out">
-            <IconButton onClick={handleZoomOut} sx={{ color: '#64ffda' }}>
+            <IconButton onClick={handleZoomOut}>
               <ZoomOutIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Fit View">
-            <IconButton onClick={handleFitView} sx={{ color: '#64ffda' }}>
+            <IconButton onClick={handleFitView}>
               <CenterFocusStrongIcon />
             </IconButton>
           </Tooltip>
         </Box>
-      </Paper>
+      </Box>
 
-      <Paper sx={{ bgcolor: 'rgba(10, 25, 47, 0.5)', p: 2, borderRadius: 2 }}>
-        <Typography variant="subtitle2" color="#64ffda" gutterBottom>
+      {/* Layout Controls Section */}
+      <Box sx={{ px: 2, pb: 2 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: '#64ffda',
+            mb: 1,
+            fontSize: '0.9rem'
+          }}
+        >
           Layout Controls
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: 1,
+          '& .MuiIconButton-root': {
+            bgcolor: 'rgba(10, 25, 47, 0.5)',
+            border: '1px solid rgba(100, 255, 218, 0.1)',
+            borderRadius: 1,
+            color: '#64ffda',
+            '&:hover': {
+              bgcolor: 'rgba(100, 255, 218, 0.1)'
+            }
+          }
+        }}>
           <Tooltip title={isPhysicsEnabled ? "Pause Physics" : "Resume Physics"}>
-            <IconButton onClick={togglePhysics} sx={{ color: '#64ffda' }}>
+            <IconButton onClick={togglePhysics}>
               {isPhysicsEnabled ? <PauseIcon /> : <PlayIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Reset Layout">
-            <IconButton onClick={resetLayout} sx={{ color: '#64ffda' }}>
+            <IconButton onClick={resetLayout}>
               <RefreshIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title={`Switch to ${layout === 'force' ? 'Hierarchical' : 'Force'} Layout`}>
-            <IconButton onClick={toggleLayout} sx={{ color: '#64ffda' }}>
+            <IconButton onClick={toggleLayout}>
               <ViewModuleIcon />
             </IconButton>
           </Tooltip>
         </Box>
-      </Paper>
+      </Box>
 
-      <GraphStats graph={graph} />
+      {/* Graph Statistics Section */}
+      <Box sx={{ px: 2, pb: 2 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: '#64ffda',
+            mb: 1,
+            fontSize: '0.9rem'
+          }}
+        >
+          Graph Statistics
+        </Typography>
+        <Box sx={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0.5
+        }}>
+          <Typography variant="body2" color="#ffffff">
+            Nodes: {graph?.nodes?.length || 0}
+          </Typography>
+          <Typography variant="body2" color="#ffffff">
+            Edges: {graph?.edges?.length || 0}
+          </Typography>
+          <Typography variant="body2" color="#ffffff">
+            Density: {((graph?.edges?.length || 0) / ((graph?.nodes?.length || 1) * ((graph?.nodes?.length || 1) - 1))).toFixed(2)}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Node Types Section */}
+      <Box sx={{ px: 2, pb: 2 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: '#64ffda',
+            mb: 1,
+            fontSize: '0.9rem'
+          }}
+        >
+          Node Types
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {[
+            { type: 'Main Topic', color: '#64ffda' },
+            { type: 'Concept', color: '#00bcd4' },
+            { type: 'Feature', color: '#7c3aed' },
+            { type: 'Location', color: '#4caf50' },
+            { type: 'Organization', color: '#ff9800' }
+          ].map((node, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  bgcolor: node.color,
+                  mr: 1.5
+                }}
+              />
+              <Typography variant="body2" color="#ffffff">
+                {node.type}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
       <Legend />
     </Box>
   );
@@ -1004,7 +1127,7 @@ const Graph = () => {
       )}
 
       {/* Node Information Dialog */}
-      <Dialog
+      <Dialog 
         open={dialogOpen} 
         onClose={() => setDialogOpen(false)}
         maxWidth="sm"
@@ -1029,8 +1152,8 @@ const Graph = () => {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
-          }}>
-            {selectedNode?.label}
+        }}>
+          {selectedNode?.label}
           </Typography>
           <IconButton 
             onClick={() => setDialogOpen(false)}
@@ -1064,10 +1187,10 @@ const Graph = () => {
           }}>
             <Typography variant="subtitle2" color="#64ffda" gutterBottom>
               Description
-            </Typography>
-            <Typography variant="body1" color="#ffffff">
-              {selectedNode?.description}
-            </Typography>
+          </Typography>
+          <Typography variant="body1" color="#ffffff">
+            {selectedNode?.description}
+          </Typography>
           </Paper>
 
           {/* Wikipedia Information Section */}
@@ -1081,7 +1204,7 @@ const Graph = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="subtitle2" color="#64ffda">
                   Detailed Information
-                </Typography>
+              </Typography>
                 {wikiInfo?.content_urls?.desktop?.page && !wikiInfo.error && (
                   <Button
                     variant="outlined"
@@ -1197,16 +1320,16 @@ const Graph = () => {
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography color="#ffffff">
+                      <Typography color="#ffffff">
                           {node.label}
-                        </Typography>
+                      </Typography>
                         <Typography variant="caption" sx={{ color: '#8892b0' }}>
                           {node.type}
                         </Typography>
                       </Box>
                     </Paper>
                   ))}
-              </Box>
+            </Box>
             </Paper>
           )}
         </DialogContent>

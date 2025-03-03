@@ -12,11 +12,11 @@ from bson import ObjectId
 import google.generativeai as genai
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required, verify_jwt_in_request
 import bcrypt
-from routes.chatRoutes import chat_bp
 from routes.auth_routes import auth_routes
 from routes.graph_routes import graph_routes
 from routes.user_routes import user_routes
 from routes.payment_routes import payment_routes
+from routes.chat_routes import chat_routes
 import razorpay
 
 # Configure logging
@@ -521,11 +521,11 @@ def update_user_profile():
         return jsonify({'error': str(e)}), 500
 
 # Register blueprints
-app.register_blueprint(chat_bp)
 app.register_blueprint(auth_routes)
 app.register_blueprint(graph_routes)
 app.register_blueprint(user_routes)
 app.register_blueprint(payment_routes)
+app.register_blueprint(chat_routes)
 
 if __name__ == '__main__':
     try:

@@ -25,6 +25,7 @@ import Contact from './components/Contact/Contact';
 import ChatBot from './components/ChatBot/ChatBot';
 import Pricing from './components/Pricing/Pricing';
 import { AuthProvider } from './contexts/AuthContext';
+import Updates from './components/Updates/Updates';
 
 const theme = createTheme({
   palette: {
@@ -126,6 +127,7 @@ const AppContent = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/updates" element={<Updates />} />
           <Route path="*" element={<Box p={3}><Typography>Page not found</Typography></Box>} />
         </Routes>
       </Box>

@@ -54,19 +54,9 @@ const Dashboard = () => {
   const [filterType, setFilterType] = useState('all');
   const [favorites, setFavorites] = useState(new Set());
   const { user } = useAuth();
-  const [graphUsage, setGraphUsage] = useState(null);
-  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
   useEffect(() => {
     dispatch(fetchGraphs());
-    fetchGraphUsage();
-
-    // Set up periodic refresh of graph usage
-    const refreshInterval = setInterval(fetchGraphUsage, 30000); // Refresh every 30 seconds
-
-    return () => {
-      clearInterval(refreshInterval); // Cleanup on unmount
-    };
   }, [dispatch]);
 
   const filteredAndSortedGraphs = React.useMemo(() => {
@@ -75,7 +65,7 @@ const Dashboard = () => {
     if (searchTerm) {
       result = result.filter(graph => 
         graph.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        graph.description.toLowerCase().includes(searchTerm.toLowerCase())
+        graph.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -84,33 +74,33 @@ const Dashboard = () => {
     }
 
     result.sort((a, b) => {
+      let comparison = 0;
       switch (sortBy) {
         case 'date':
-          return sortOrder === 'desc' 
-            ? new Date(b.updatedAt) - new Date(a.updatedAt)
-            : new Date(a.updatedAt) - new Date(b.updatedAt);
+          comparison = new Date(b.created_at || 0) - new Date(a.created_at || 0);
+          break;
         case 'name':
-          return sortOrder === 'desc'
-            ? b.title.localeCompare(a.title)
-            : a.title.localeCompare(b.title);
+          comparison = (a.title || '').localeCompare(b.title || '');
+          break;
         case 'nodes':
-          return sortOrder === 'desc'
-            ? (b.nodes?.length || 0) - (a.nodes?.length || 0)
-            : (a.nodes?.length || 0) - (b.nodes?.length || 0);
+          comparison = (b.nodes?.length || 0) - (a.nodes?.length || 0);
+          break;
         default:
-          return 0;
+          comparison = 0;
       }
+      return sortOrder === 'asc' ? comparison * -1 : comparison;
     });
 
     return result;
   }, [graphs, searchTerm, sortBy, sortOrder, filterType]);
 
   const handleCreateGraph = (graphData) => {
-    dispatch(createGraph(graphData)).then((action) => {
+    dispatch(createGraph(graphData)).then(async (action) => {
       if (action.payload && !action.error) {
         const graphId = action.payload._id;
-        fetchGraphUsage();
         navigate(`/graph/${graphId}`);
+      } else {
+        console.error('Error creating graph:', action.error);
       }
     });
     setDialogOpen(false);
@@ -164,29 +154,6 @@ const Dashboard = () => {
       case 'process': return '#4caf50';
       case 'system': return '#ff9800';
       default: return '#64ffda';
-    }
-  };
-
-  const fetchGraphUsage = async () => {
-    try {
-      setIsLoadingUsage(true);
-      const response = await fetch('http://localhost:5000/api/user/graph-usage', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      if (data.error) {
-        console.error('Error fetching graph usage:', data.error);
-        setGraphUsage({ graphs_created_today: 0, is_premium: false });
-      } else {
-        setGraphUsage(data);
-      }
-    } catch (error) {
-      console.error('Error fetching graph usage:', error);
-      setGraphUsage({ graphs_created_today: 0, is_premium: false });
-    } finally {
-      setIsLoadingUsage(false);
     }
   };
 
@@ -247,7 +214,6 @@ const Dashboard = () => {
             
             if (data.success) {
               // Update local user state to reflect premium status
-              fetchGraphUsage();
               alert('Successfully upgraded to premium!');
             }
           } catch (err) {
@@ -286,46 +252,6 @@ const Dashboard = () => {
         <Typography variant="h4" color="#64ffda">
           My Knowledge Graphs
         </Typography>
-
-        {/* Graph Usage Indicator */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 2,
-          bgcolor: 'rgba(17, 34, 64, 0.8)',
-          p: 2,
-          borderRadius: 1,
-          border: '1px solid rgba(100, 255, 218, 0.1)'
-        }}>
-          {isLoadingUsage ? (
-            <CircularProgress size={20} sx={{ color: '#64ffda' }} />
-          ) : (
-            <Typography variant="body2" sx={{ color: '#8892b0' }}>
-              {graphUsage?.is_premium ? (
-                'Premium User (Unlimited Graphs)'
-              ) : (
-                `Daily Graphs: ${graphUsage?.graphs_created_today || 0} / 10`
-              )}
-            </Typography>
-          )}
-          {!graphUsage?.is_premium && !isLoadingUsage && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handlePremiumUpgrade}
-              sx={{ 
-                color: '#64ffda',
-                borderColor: '#64ffda',
-                '&:hover': {
-                  borderColor: '#4caf50',
-                  bgcolor: 'rgba(100, 255, 218, 0.1)'
-                }
-              }}
-            >
-              Upgrade to Premium
-            </Button>
-          )}
-        </Box>
         
         <Button
           variant="contained"
@@ -370,10 +296,31 @@ const Dashboard = () => {
           <Tooltip title="Sort by">
             <Button
               startIcon={<SortIcon />}
-              onClick={(e) => handleSortChange(sortBy)}
-              sx={{ color: '#64ffda', borderColor: '#64ffda' }}
+              onClick={() => {
+                const nextSortBy = sortBy === 'date' ? 'name' : 
+                                 sortBy === 'name' ? 'nodes' : 'date';
+                setSortBy(nextSortBy);
+              }}
+              sx={{ 
+                color: '#64ffda', 
+                borderColor: '#64ffda',
+                textTransform: 'capitalize'
+              }}
             >
-              {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+              {sortBy === 'date' ? 'Date' : 
+               sortBy === 'name' ? 'Name' : 'Nodes'}
+            </Button>
+          </Tooltip>
+          <Tooltip title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}>
+            <Button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              sx={{ 
+                color: '#64ffda', 
+                borderColor: '#64ffda',
+                minWidth: '40px'
+              }}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
             </Button>
           </Tooltip>
         </Box>
@@ -410,7 +357,13 @@ const Dashboard = () => {
                 title={graph.title}
                 subheader={
                   <Typography color="#8892b0" variant="caption">
-                    Last updated: {new Date(graph.updatedAt).toLocaleDateString()}
+                    Created on: {graph.created_at ? new Date(graph.created_at).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : 'Not available'}
                   </Typography>
                 }
               />

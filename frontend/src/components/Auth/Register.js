@@ -29,7 +29,7 @@ const Register = () => {
     }
     const result = await dispatch(register(userData));
     if (!result.error) {
-      navigate('/login');
+      navigate('/dashboard'); // Navigate to dashboard instead of login page
     }
   };
 
