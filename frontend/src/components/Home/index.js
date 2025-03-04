@@ -6,6 +6,7 @@ import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import styled from '@emotion/styled';
 import { FaDatabase, FaProjectDiagram, FaBrain, FaRocket, FaUsers, FaChartLine } from 'react-icons/fa';
 import HomeNavbar from '../Layout/HomeNavbar';
+import ShinyText from './ShinyText';
 
 // Styled Components
 const DarkBackground = styled(Box)`
@@ -221,7 +222,7 @@ const Home = () => {
                     letterSpacing: '-1px'
                   }}
                 >
-                  NEXORAZ
+                  <ShinyText text="NEXORAZ" speed={3} />
                 </Typography>
                 <Typography 
                   variant="h2" 
