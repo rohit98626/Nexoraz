@@ -22,7 +22,7 @@ const Pricing = () => {
     },
     {
       name: 'Premium',
-      price: 999, // Price in INR
+      price: 750, // Price in INR
       features: [
         'Advanced Knowledge Graph',
         'Unlimited Queries',
@@ -52,7 +52,7 @@ const Pricing = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/create-order', {
+      const response = await fetch('http://localhost:5000/api/payment/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ const Pricing = () => {
         order_id: order.id,
         handler: async function (response) {
           try {
-            const result = await fetch('http://localhost:5000/api/verify-payment', {
+            const result = await fetch('http://localhost:5000/api/payment/verify', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
