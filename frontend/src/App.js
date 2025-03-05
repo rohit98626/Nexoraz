@@ -135,7 +135,7 @@ const AppContent = () => {
         </Routes>
       </Box> 
       <Footer />
-      {!isHomePage && !isLoginPage && !isRegisterPage && !InteractiveVisualizationPage && !RealTimeCollaborationPage && !AIAnalytics && <ChatBot />}
+      {!isHomePage && !isLoginPage && !isRegisterPage && !InteractiveVisualizationPage && !RealTimeCollaborationPage && !AIAnalyticsPage && <ChatBot />}
     </Box>
   );
 };
