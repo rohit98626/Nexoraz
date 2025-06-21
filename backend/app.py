@@ -32,7 +32,7 @@ CORS(app, resources={
     r"/api/*": {
         "origins": [
             "http://localhost:3000",
-            "https://nexoraz-hiclpts0w-rohits-projects-bdcce9d1.vercel.app/" 
+            "https://nexoraz.netlify.app/" 
         ],
         "methods": ["GET", "POST", "PUT", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"],
