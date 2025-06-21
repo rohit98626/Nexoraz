@@ -16,7 +16,7 @@ from routes.auth_routes import auth_routes
 from routes.graph_routes import graph_routes
 from routes.user_routes import user_routes
 from routes.payment_routes import payment_routes
-from routes.chat_routes import chat_routes
+from routes.chatRoutes import chat_bp as chat_routes
 import razorpay
 
 # Configure logging
