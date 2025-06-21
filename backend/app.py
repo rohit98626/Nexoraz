@@ -30,7 +30,10 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:3000"],
+        "origins": [
+            "http://localhost:3000",
+            "https://nexoraz-hiclpts0w-rohits-projects-bdcce9d1.vercel.app/" 
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"],
         "expose_headers": ["Authorization"],
