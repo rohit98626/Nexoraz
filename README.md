@@ -99,6 +99,8 @@ Deploy on Render/Heroku/AWS
 
 Ensure MongoDB and API keys are configured correctly
 
+Live Production : https://nexoraz.netlify.app/
+
 
 👤 Connect with Me
 
